@@ -9,7 +9,7 @@ import no.nav.syfo.log
 import no.nav.syfo.soknad.kafka.SyfoSoknadConsumer
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 class SyfoSoknadService(
     private val applicationState: ApplicationState,

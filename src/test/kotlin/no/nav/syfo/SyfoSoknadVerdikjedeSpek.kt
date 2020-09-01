@@ -9,7 +9,6 @@ import io.ktor.jackson.jackson
 import io.ktor.server.testing.TestApplicationEngine
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.* // ktlint-disable no-wildcard-imports
-import java.util.* // ktlint-disable no-wildcard-imports
 import kotlinx.coroutines.runBlocking
 import no.nav.brukernotifikasjon.schemas.Beskjed
 import no.nav.syfo.application.ApplicationState
@@ -33,6 +32,7 @@ import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import java.util.* // ktlint-disable no-wildcard-imports
 
 @KtorExperimentalAPI
 object SyfoSoknadVerdikjedeSpek : Spek({

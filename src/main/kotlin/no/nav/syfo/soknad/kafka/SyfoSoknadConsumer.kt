@@ -1,8 +1,8 @@
 package no.nav.syfo.soknad.kafka
 
-import java.time.Duration
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import java.time.Duration
 
 class SyfoSoknadConsumer(
     private val syfoSoknadConsumer: KafkaConsumer<String, String>
