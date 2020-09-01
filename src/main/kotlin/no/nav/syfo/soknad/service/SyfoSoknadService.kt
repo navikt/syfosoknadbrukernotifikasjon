@@ -1,16 +1,15 @@
 package no.nav.syfo.soknad.service
 
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.UUID
 import kotlinx.coroutines.delay
 import no.nav.brukernotifikasjon.schemas.Beskjed
 import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.syfo.Environment
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.log
 import no.nav.syfo.soknad.kafka.SyfoSoknadConsumer
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 class SyfoSoknadService(
     private val applicationState: ApplicationState,
@@ -28,7 +27,7 @@ class SyfoSoknadService(
                 it.offset()
                 if (erSoknad) {
                     val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
-                    håndterSyfoSoknad(
+                    handterSyfoSoknad(
                         id = id,
                         fnr = it.key(),
                         soknad = it.value()
@@ -39,7 +38,7 @@ class SyfoSoknadService(
         }
     }
 
-    fun håndterSyfoSoknad(id: UUID, fnr: String, soknad: String) {
+    fun handterSyfoSoknad(id: UUID, fnr: String, soknad: String) {
 
         log.info("Legger dittnav beskjed på kafka med id $id")
         brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonMelding(

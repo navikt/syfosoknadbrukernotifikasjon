@@ -1,7 +1,7 @@
 package no.nav.syfo.application.util
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer
-import java.util.* // ktlint-disable no-wildcard-imports
+import java.util.Properties
 import no.nav.brukernotifikasjon.schemas.Beskjed
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
