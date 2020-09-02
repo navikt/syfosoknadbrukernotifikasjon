@@ -7,11 +7,13 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
+import io.ktor.routing.routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.Environment
+import no.nav.syfo.application.api.registerNaisApi
 import no.nav.syfo.soknad.service.SyfoSoknadService
 
 @KtorExperimentalAPI
@@ -28,5 +30,8 @@ fun createApplicationEngine(
                 configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
+        }
+        routing {
+            registerNaisApi(applicationState)
         }
     }
