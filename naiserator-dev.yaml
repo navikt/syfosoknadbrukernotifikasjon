@@ -34,28 +34,9 @@ spec:
       cpu: 400m
       memory: 768Mi
   accessPolicy:
-    outbound:
-      external:
-        - host: login.microsoftonline.com
-        - host: b27apvl00045.preprod.local
-          ports:
-            - port: 8443
-              name: kafka
-              protocol: TLS
-        - host: b27apvl00046.preprod.local
-          ports:
-            - port: 8443
-              name: kafka
-              protocol: TLS
-        - host: b27apvl00047.preprod.local
-          ports:
-            - port: 8443
-              name: kafka
-              protocol: TLS
     inbound:
       rules:
         - application: syfosoknadbrukernotifikasjon-proxy
-
   envFrom:
     - secret: syfosoknadbrukernotifikasjon-serviceuser
   env:
