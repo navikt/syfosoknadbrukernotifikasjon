@@ -8,6 +8,6 @@ class SyfoSoknadConsumer(
     private val syfoSoknadConsumer: KafkaConsumer<String, String>
 ) {
     fun poll(): ConsumerRecords<String, String> {
-        return syfoSoknadConsumer.poll(Duration.ofMillis(0))
+        return syfoSoknadConsumer.poll(Duration.ofMillis(500))
     }
 }
