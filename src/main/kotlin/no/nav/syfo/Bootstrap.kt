@@ -41,6 +41,10 @@ fun main() {
 
     DefaultExports.initialize()
 
+    // Sov litt slik at sidecars er klare
+    Thread.sleep(env.sidecarInitialDelay)
+    log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
+
     val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
 
     val brukernotifikasjonKafkaProducer = getBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
