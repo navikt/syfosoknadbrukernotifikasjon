@@ -14,13 +14,11 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.Environment
 import no.nav.syfo.application.api.registerNaisApi
-import no.nav.syfo.soknad.service.SyfoSoknadService
 
 @KtorExperimentalAPI
 fun createApplicationEngine(
     env: Environment,
-    applicationState: ApplicationState,
-    syfoSoknadService: SyfoSoknadService
+    applicationState: ApplicationState
 ): ApplicationEngine =
     embeddedServer(Netty, env.applicationPort) {
         install(ContentNegotiation) {

@@ -29,8 +29,7 @@ class SyfoSoknadService(
                     val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
                     handterSyfoSoknad(
                         id = id,
-                        fnr = it.key(),
-                        soknad = it.value()
+                        fnr = it.key()
                     )
                 }
             }
@@ -38,7 +37,7 @@ class SyfoSoknadService(
         }
     }
 
-    fun handterSyfoSoknad(id: UUID, fnr: String, soknad: String) {
+    fun handterSyfoSoknad(id: UUID, fnr: String) {
 
         log.info("Legger dittnav beskjed på kafka med id $id")
         brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonMelding(

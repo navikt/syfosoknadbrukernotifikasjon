@@ -58,7 +58,7 @@ fun main() {
 
     applicationState.ready = true
 
-    val applicationEngine = createApplicationEngine(env, applicationState, syfoSoknadService)
+    val applicationEngine = createApplicationEngine(env, applicationState)
 
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()

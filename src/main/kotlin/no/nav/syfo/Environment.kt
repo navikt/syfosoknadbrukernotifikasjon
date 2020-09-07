@@ -10,7 +10,6 @@ data class Environment(
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
-    val loginserviceClientId: String = getEnvVar("LOGINSERVICE_CLIENTID"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "15000").toLong()
 ) : KafkaConfig {
 
