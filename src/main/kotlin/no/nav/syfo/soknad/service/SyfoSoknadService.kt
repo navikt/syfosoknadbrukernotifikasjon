@@ -9,7 +9,7 @@ import no.nav.syfo.log
 import no.nav.syfo.soknad.kafka.SyfoSoknadConsumer
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.UUID
+import java.util.*
 
 class SyfoSoknadService(
     private val applicationState: ApplicationState,
@@ -22,7 +22,7 @@ class SyfoSoknadService(
             val consumerRecords = syfoSoknadConsumer.poll()
             consumerRecords.forEach {
                 val erSoknad = it.headers().any { header ->
-                    header.key() == "type" && String(header.value()) == "Soknad"
+                    header.key() == "MELDINGSTYPE" && String(header.value()) == "SYKEPENGESOKNAD"
                 }
                 it.offset()
                 if (erSoknad) {
