@@ -22,7 +22,7 @@ class SyfoSoknadService(
             val consumerRecords = syfoSoknadConsumer.poll()
             consumerRecords.forEach {
                 val erSoknad = it.headers().any { header ->
-                    header.key() == "type" && String(header.value()) == "Soknad"
+                    header.key() == "MELDINGSTYPE" && String(header.value()) == "SYKEPENGESOKNAD"
                 }
                 it.offset()
                 if (erSoknad) {
