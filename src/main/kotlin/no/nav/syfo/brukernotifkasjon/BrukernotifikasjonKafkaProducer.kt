@@ -11,7 +11,7 @@ class BrukernotifikasjonKafkaProducer(
 ) {
     fun opprettBrukernotifikasjonMelding(nokkel: Nokkel, beskjed: Beskjed) {
         try {
-            kafkaproducerBedskjed.send(ProducerRecord("aapen-brukernotifikasjon-nyMelding-v1", nokkel, beskjed)).get()
+            kafkaproducerBedskjed.send(ProducerRecord("aapen-brukernotifikasjon-nyBeskjed-v1", nokkel, beskjed)).get()
         } catch (e: Exception) {
             log.error("Noe gikk galt ved sending av melding med id {}: ${e.message}", nokkel.getEventId())
             throw e
