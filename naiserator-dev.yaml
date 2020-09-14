@@ -12,6 +12,9 @@ spec:
     max: 2
     cpuThresholdPercentage: 90
   port: 8080
+  outbound:
+    external:
+      - host: kafka-schema-registry.nais-q.adeo.no
   liveness:
     path: /is_alive
     initialDelay: 10
