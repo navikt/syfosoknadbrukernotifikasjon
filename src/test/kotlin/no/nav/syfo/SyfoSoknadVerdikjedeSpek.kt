@@ -104,7 +104,7 @@ object SyfoSoknadVerdikjedeSpek : Spek({
                         SYFO_SOKNAD_V2,
                         null,
                         fnr,
-                        "{ \"soknad\": 123}",
+                        "{\"fnr\":\"$fnr\"}",
                         listOf(RecordHeader("MELDINGSTYPE", "SYKEPENGESOKNAD".toByteArray()))
                     )
                 )

@@ -7,6 +7,8 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
 import no.nav.syfo.log
 import no.nav.syfo.soknad.kafka.SyfoSoknadConsumer
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.json.JSONObject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -20,16 +22,19 @@ class SyfoSoknadService(
     suspend fun start() {
         while (applicationState.ready) {
             val consumerRecords = syfoSoknadConsumer.poll()
-            consumerRecords.forEach {
+            consumerRecords.forEach { it: ConsumerRecord<String, String> ->
                 val erSoknad = it.headers().any { header ->
                     header.key() == "MELDINGSTYPE" && String(header.value()) == "SYKEPENGESOKNAD"
                 }
+
+                val fnr: String = JSONObject(it.value()).getString("fnr")
+
                 it.offset()
                 if (erSoknad) {
                     val id = UUID.nameUUIDFromBytes("${it.partition()}-${it.offset()}".toByteArray())
                     handterSyfoSoknad(
                         id = id,
-                        fnr = it.key()
+                        fnr = fnr
                     )
                 }
             }
