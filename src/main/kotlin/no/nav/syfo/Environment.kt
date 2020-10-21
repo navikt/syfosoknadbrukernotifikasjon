@@ -9,6 +9,7 @@ data class Environment(
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
+    val sykepengesoknadFrontend: String = getEnvVar("SYKEPENGESOKNAD_FRONTEND_URL"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "15000").toLong()
 ) : KafkaConfig {
@@ -20,6 +21,10 @@ data class Environment(
             override val kafkaUsername: String
                 get() = serviceuserUsername
         }
+    }
+
+    fun isProd(): Boolean {
+        return cluster == "prod-gcp"
     }
 }
 

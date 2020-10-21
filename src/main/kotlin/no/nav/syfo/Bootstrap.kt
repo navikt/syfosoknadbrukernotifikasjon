@@ -15,11 +15,11 @@ import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.util.KafkaClients
-import no.nav.syfo.application.util.KafkaFactory.Companion.getBrukernotifikasjonKafkaProducer
+import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
-import no.nav.syfo.soknad.kafka.SyfoSoknadConsumer
-import no.nav.syfo.soknad.service.SyfoSoknadService
+import no.nav.syfo.soknad.kafka.SyfosoknadKafkaPoller
+import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -47,13 +47,14 @@ fun main() {
 
     val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
 
-    val brukernotifikasjonKafkaProducer = getBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
-    val syfoSoknadConsumer = SyfoSoknadConsumer(kafkaClients.syfoSoknadConsumer)
-    val syfoSoknadService = SyfoSoknadService(
+    val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
+    val syfosoknadKafkaPoller = SyfosoknadKafkaPoller(kafkaClients.syfoSoknadConsumer)
+    val syfoSoknadService = SykepengesoknadBrukernotifikasjonService(
         applicationState = applicationState,
-        syfoSoknadConsumer = syfoSoknadConsumer,
+        syfosoknadKafkaPoller = syfosoknadKafkaPoller,
         brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
-        servicebruker = "srvsyfosokbrukerntf"
+        servicebruker = "srvsyfosokbrukerntf",
+        environment = env
     )
 
     applicationState.ready = true

@@ -34,9 +34,9 @@ spec:
       cpu: 400m
       memory: 768Mi
   accessPolicy:
-    inbound:
-      rules:
-        - application: syfosoknadbrukernotifikasjon-proxy
+    outbound:
+      external:
+        - host: kafka-schema-registry.nais-q.adeo.no
   envFrom:
     - secret: syfosoknadbrukernotifikasjon-serviceuser
   env:
@@ -46,3 +46,5 @@ spec:
       value: "0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5"
     - name: KAFKA_SCHEMA_REGISTRY_URL
       value: https://kafka-schema-registry.nais-q.adeo.no
+    - name: SYKEPENGESOKNAD_FRONTEND_URL
+      value: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
