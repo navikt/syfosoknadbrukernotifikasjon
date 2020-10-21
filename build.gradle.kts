@@ -22,10 +22,7 @@ val spekVersion = "2.0.9"
 val testContainerKafkaVersion = "1.12.5"
 val confluentVersion = "5.5.1"
 
-val postgresVersion = "42.2.15"
-val flywayVersion = "6.5.4"
-val hikariVersion = "3.4.5"
-val brukernotifikasjonAvroVersion = "1.2020.08.13-13.50-3b6ca1881161"
+val brukernotifikasjonAvroVersion = "1.2020.10.05-12.29-a202d85e3986"
 
 val ktlint by configurations.creating
 
@@ -87,8 +84,6 @@ dependencies {
     implementation("io.ktor:ktor-client-auth-basic:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
     implementation("io.ktor:ktor-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-auth:$ktorVersion")
-    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
@@ -98,15 +93,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
-    implementation("org.postgresql:postgresql:$postgresVersion")
-    implementation("com.zaxxer:HikariCP:$hikariVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
-
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("org.json:json:20200518")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
