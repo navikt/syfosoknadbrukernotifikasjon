@@ -36,13 +36,13 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: kafka-schema-registry.nais-q.adeo.no
+        - host: kafka-schema-registry.nais.adeo.no
   envFrom:
     - secret: syfosoknadbrukernotifikasjon-serviceuser
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443
+      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
     - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais-q.adeo.no
+      value: https://kafka-schema-registry.nais.adeo.no
     - name: SYKEPENGESOKNAD_FRONTEND_URL
-      value: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
+      value: https://tjenester.nav.no/sykepengesoknad/soknader/
