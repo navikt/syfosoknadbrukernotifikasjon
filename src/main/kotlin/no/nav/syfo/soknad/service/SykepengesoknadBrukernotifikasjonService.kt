@@ -69,7 +69,7 @@ class SykepengesoknadBrukernotifikasjonService(
                 )
             }
         } else {
-            log.info("Sykepengesøknad ${sykepengesoknad.id} er ikke ny nok for å få brukernotifikasjon / done event")
+            log.info("Sykepengesøknad ${sykepengesoknad.id} opprettet ${sykepengesoknad.opprettet} er ikke ny nok for å få brukernotifikasjon / done event")
         }
     }
 
