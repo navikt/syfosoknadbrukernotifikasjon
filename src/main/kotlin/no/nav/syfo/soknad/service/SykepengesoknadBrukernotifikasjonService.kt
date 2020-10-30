@@ -75,7 +75,7 @@ class SykepengesoknadBrukernotifikasjonService(
 
     private fun EnkelSykepengesoknad.erNyNokForBrukernotifikasjon(): Boolean {
         return if (environment.isProd()) {
-            this.opprettet.isAfter(LocalDate.of(2020, 12, 1).atTime(9, 0))
+            this.opprettet.isAfter(LocalDate.of(2020, 10, 30).atTime(11, 0))
         } else {
             this.opprettet.isAfter(LocalDate.of(2020, 10, 10).atTime(9, 0))
         }
