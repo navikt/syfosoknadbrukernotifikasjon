@@ -9,6 +9,7 @@ version = "1.0.0"
 val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.11.2"
 val javaxActivationVersion = "1.1.1"
+val postgresEmbeddedVersion = "0.13.3"
 val kafkaEmbeddedVersion = "2.4.0"
 val kluentVersion = "1.49"
 val ktorVersion = "1.3.2"
@@ -21,6 +22,9 @@ val smCommonVersion = "1.7cb158e"
 val spekVersion = "2.0.9"
 val testContainerKafkaVersion = "1.12.5"
 val confluentVersion = "5.5.1"
+val postgresVersion = "42.2.18"
+val flywayVersion = "7.1.1"
+val hikariVersion = "3.4.5"
 
 val brukernotifikasjonAvroVersion = "1.2020.10.05-12.29-a202d85e3986"
 
@@ -96,6 +100,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
@@ -112,6 +120,8 @@ dependencies {
     }
 
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
+    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
+
 }
 
 val ktlintCheck by tasks.creating(JavaExec::class) {

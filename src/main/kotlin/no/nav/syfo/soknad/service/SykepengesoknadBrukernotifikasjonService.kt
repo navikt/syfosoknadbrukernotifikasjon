@@ -7,12 +7,17 @@ import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.syfo.Environment
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.log
+import no.nav.syfo.soknad.db.finnBrukernotifikasjon
+import no.nav.syfo.soknad.db.opprettBrukernotifikasjon
+import no.nav.syfo.soknad.db.settDoneSendt
 import no.nav.syfo.soknad.domene.EnkelSykepengesoknad
 import no.nav.syfo.soknad.domene.Soknadsstatus
 import no.nav.syfo.soknad.domene.Soknadstype
 import no.nav.syfo.soknad.domene.tilEnkelSykepengesoknad
 import no.nav.syfo.soknad.kafka.SyfosoknadKafkaPoller
+import java.time.Instant
 import java.time.LocalDate
 
 class SykepengesoknadBrukernotifikasjonService(
@@ -20,6 +25,7 @@ class SykepengesoknadBrukernotifikasjonService(
     private val syfosoknadKafkaPoller: SyfosoknadKafkaPoller,
     private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
     private val servicebruker: String,
+    private val database: DatabaseInterface,
     private val environment: Environment
 ) {
     suspend fun start() {
@@ -40,10 +46,12 @@ class SykepengesoknadBrukernotifikasjonService(
             log.info("Sykepengesoknad ${sykepengesoknad.id} har ikke fnr, behandler ikke brukernotifikasjon")
             return
         }
-        if (sykepengesoknad.erNyNokForBrukernotifikasjon()) {
-            val grupperingsid = sykepengesoknad.sykmeldingId ?: sykepengesoknad.id
 
-            if (sykepengesoknad.skalOppretteOppgave()) {
+        val grupperingsid = sykepengesoknad.sykmeldingId ?: sykepengesoknad.id
+
+        if (sykepengesoknad.skalOppretteOppgave()) {
+            val brukernotfikasjon = database.finnBrukernotifikasjon(sykepengesoknad.id)
+            if (brukernotfikasjon == null) {
                 log.info("Sender dittnav oppgave med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
                 brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
                     Nokkel(servicebruker, sykepengesoknad.id),
@@ -56,29 +64,53 @@ class SykepengesoknadBrukernotifikasjonService(
                         4
                     )
                 )
-            }
-            if (sykepengesoknad.skalSendeDoneMelding()) {
-                log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                brukernotifikasjonKafkaProducer.sendDonemelding(
-                    Nokkel(servicebruker, sykepengesoknad.id),
-                    Done(
-                        System.currentTimeMillis(),
-                        fnr,
-                        grupperingsid
-                    )
+                database.opprettBrukernotifikasjon(
+                    soknadsid = sykepengesoknad.id,
+                    grupperingsid = grupperingsid,
+                    fnr = fnr,
+                    oppgaveSendt = Instant.now()
                 )
+            } else {
+                log.info("Har allerede sendt brukernotifikasjon oppgave for søknad med id  ${sykepengesoknad.id}")
             }
-        } else {
-            log.info("Sykepengesøknad ${sykepengesoknad.id} opprettet ${sykepengesoknad.opprettet} er ikke ny nok for å få brukernotifikasjon / done event")
+        } else if (sykepengesoknad.skalSendeDoneMelding()) {
+            val brukernotfikasjon = database.finnBrukernotifikasjon(sykepengesoknad.id)
+            if (brukernotfikasjon != null) {
+                if (brukernotfikasjon.doneSendt == null) {
+                    log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
+                    brukernotifikasjonKafkaProducer.sendDonemelding(
+                        Nokkel(servicebruker, sykepengesoknad.id),
+                        Done(
+                            System.currentTimeMillis(),
+                            fnr,
+                            grupperingsid
+                        )
+                    )
+                    database.settDoneSendt(sykepengesoknad.id)
+                } else {
+                    log.info("Har allerede sendt brukernotifikasjon done melding for søknad med id  ${sykepengesoknad.id}")
+                }
+            } else {
+                // Sender done meldinger slik at de vi har i produksjon i dag kan donnes ut
+                if (sykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen()) {
+                    log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid på brukernotifikasjon vi nok har sendt tidligere")
+                    brukernotifikasjonKafkaProducer.sendDonemelding(
+                        Nokkel(servicebruker, sykepengesoknad.id),
+                        Done(
+                            System.currentTimeMillis(),
+                            fnr,
+                            grupperingsid
+                        )
+                    )
+                }
+            }
         }
     }
 
-    private fun EnkelSykepengesoknad.erNyNokForBrukernotifikasjon(): Boolean {
-        return if (environment.isProd()) {
-            this.opprettet.isAfter(LocalDate.of(2020, 10, 30).atTime(11, 0))
-        } else {
-            this.opprettet.isAfter(LocalDate.of(2020, 10, 10).atTime(9, 0))
-        }
+    private fun EnkelSykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen(): Boolean {
+
+        return this.opprettet.isAfter(LocalDate.of(2020, 10, 30).atTime(11, 0)) &&
+            this.opprettet.isBefore(LocalDate.of(2020, 11, 4).atTime(0, 0))
     }
 
     private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {

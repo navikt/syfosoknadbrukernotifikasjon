@@ -8,6 +8,11 @@ data class Environment(
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
     override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+    val dbHost: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_HOST"),
+    val dbPort: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_PORT"),
+    val dbName: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_DATABASE"),
+    val dbUsername: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_USERNAME"),
+    val dbPassword: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_PASSWORD"),
     val serviceuserUsername: String = getEnvVar("SERVICEUSER_USERNAME"),
     val sykepengesoknadFrontend: String = getEnvVar("SYKEPENGESOKNAD_FRONTEND_URL"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
@@ -25,6 +30,10 @@ data class Environment(
 
     fun isProd(): Boolean {
         return cluster == "prod-gcp"
+    }
+
+    fun jdbcUrl(): String {
+        return "jdbc:postgresql://$dbHost:$dbPort/$dbName"
     }
 }
 
