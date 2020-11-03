@@ -33,6 +33,12 @@ spec:
     requests:
       cpu: 400m
       memory: 768Mi
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_11
+        databases:
+          - name: syfosoknadbrukernotifikasjon-db
+            diskAutoresize: true
   accessPolicy:
     outbound:
       external:
