@@ -16,6 +16,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.util.KafkaClients
 import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
+import no.nav.syfo.db.Database
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.soknad.kafka.SyfosoknadKafkaPoller
@@ -45,11 +46,14 @@ fun main() {
     Thread.sleep(env.sidecarInitialDelay)
     log.info("Sov i ${env.sidecarInitialDelay} ms i håp om at sidecars er klare")
 
+    val database = Database(env)
+
     val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
 
     val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
     val syfosoknadKafkaPoller = SyfosoknadKafkaPoller(kafkaClients.syfoSoknadConsumer)
-    val syfoSoknadService = SykepengesoknadBrukernotifikasjonService(
+    val sykepengesoknadBrukernotifikasjonService = SykepengesoknadBrukernotifikasjonService(
+        database = database,
         applicationState = applicationState,
         syfosoknadKafkaPoller = syfosoknadKafkaPoller,
         brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
@@ -65,7 +69,7 @@ fun main() {
     applicationServer.start()
 
     createListener(applicationState) {
-        syfoSoknadService.start()
+        sykepengesoknadBrukernotifikasjonService.start()
     }
 }
 
