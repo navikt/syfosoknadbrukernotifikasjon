@@ -12,6 +12,7 @@ import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.log
 import no.nav.syfo.soknad.db.finnBrukernotifikasjon
 import no.nav.syfo.soknad.domene.tilEnkelSykepengesoknad
+import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService.EnkelSykepengesoknadUtil.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen
 import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService.EnkelSykepengesoknadUtil.skalOppretteOppgave
 import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService.EnkelSykepengesoknadUtil.skalSendeDoneMelding
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -108,7 +109,9 @@ class SpoleService(
                     if (sykepengesoknad.skalOppretteOppgave()) {
                         val brukernotfikasjon = database.finnBrukernotifikasjon(sykepengesoknad.id)
                         if (brukernotfikasjon == null) {
-                            log.info("SpoleService finner ikke: dittnav oppgave for søknad ${sykepengesoknad.id}")
+                            if (sykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen() == false) {
+                                log.info("SpoleService finner ikke: dittnav oppgave for søknad ${sykepengesoknad.id}")
+                            }
                         }
                     } else if (sykepengesoknad.skalSendeDoneMelding()) {
                         val brukernotfikasjon = database.finnBrukernotifikasjon(sykepengesoknad.id)
