@@ -23,6 +23,7 @@ spec:
     initialDelay: 30
     periodSeconds: 5
     timeout: 5
+  leaderElection: true
   prometheus:
     enabled: true
     path: /prometheus
