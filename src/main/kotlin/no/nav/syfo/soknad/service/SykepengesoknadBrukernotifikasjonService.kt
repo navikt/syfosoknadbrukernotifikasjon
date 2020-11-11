@@ -107,29 +107,27 @@ class SykepengesoknadBrukernotifikasjonService(
         }
     }
 
-    companion object EnkelSykepengesoknadUtil {
-        fun EnkelSykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen(): Boolean {
+    private fun EnkelSykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen(): Boolean {
 
-            return this.opprettet.isAfter(LocalDate.of(2020, 10, 30).atTime(11, 0)) &&
-                this.opprettet.isBefore(LocalDate.of(2020, 11, 4).atTime(0, 0))
+        return this.opprettet.isAfter(LocalDate.of(2020, 10, 30).atTime(11, 0)) &&
+            this.opprettet.isBefore(LocalDate.of(2020, 11, 4).atTime(0, 0))
+    }
+
+    private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
+        return this.status == Soknadsstatus.NY && this.type != Soknadstype.OPPHOLD_UTLAND
+    }
+
+    private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
+        if (this.type == Soknadstype.OPPHOLD_UTLAND) {
+            return false
         }
-
-        fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
-            return this.status == Soknadsstatus.NY && this.type != Soknadstype.OPPHOLD_UTLAND
-        }
-
-        fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
-            if (this.type == Soknadstype.OPPHOLD_UTLAND) {
-                return false
-            }
-            return when (this.status) {
-                Soknadsstatus.SLETTET -> true
-                Soknadsstatus.AVBRUTT -> true
-                Soknadsstatus.SENDT -> true
-                Soknadsstatus.NY -> false
-                Soknadsstatus.FREMTIDIG -> false
-                Soknadsstatus.KORRIGERT -> false
-            }
+        return when (this.status) {
+            Soknadsstatus.SLETTET -> true
+            Soknadsstatus.AVBRUTT -> true
+            Soknadsstatus.SENDT -> true
+            Soknadsstatus.NY -> false
+            Soknadsstatus.FREMTIDIG -> false
+            Soknadsstatus.KORRIGERT -> false
         }
     }
 }
