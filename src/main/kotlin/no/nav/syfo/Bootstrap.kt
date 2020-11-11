@@ -78,7 +78,8 @@ fun main() {
         podLeaderCoordinator = PodLeaderCoordinator(env = env),
         database = database,
         applicationState = applicationState,
-        env = env
+        env = env,
+        sykepengesoknadBrukernotifikasjonService = sykepengesoknadBrukernotifikasjonService
     )
     GlobalScope.launch {
         spoleService.start()

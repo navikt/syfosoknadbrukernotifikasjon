@@ -28,6 +28,7 @@ class SpoleService(
     private val database: DatabaseInterface,
     private val applicationState: ApplicationState,
     private val env: Environment,
+    private val sykepengesoknadBrukernotifikasjonService: SykepengesoknadBrukernotifikasjonService,
     private val delayStart: Long = 100_000L,
     private val topicName: List<String> = listOf(Topics.SYFO_SOKNAD_V2, Topics.SYFO_SOKNAD_V3)
 ) {
@@ -121,16 +122,17 @@ class SpoleService(
             }
         }
 
-        // DRY RUN
         rebehandlinger.forEach {
             if (it.sisteSoknad == null) {
-                log.info("DRY RUN - SpoleService finner ikke søknad ${it.soknadId}, skal ikke skje!")
+                log.info("SpoleService finner ikke søknad ${it.soknadId}, skal ikke skje!")
             } else if (it.sisteSoknad!!.skalOppretteOppgave() && database.finnBrukernotifikasjon(it.soknadId) == null) {
-                log.info("DRY RUN - SpoleService ville opprettet oppgave for ${it.soknadId}")
+                log.info("SpoleService oppretter oppgave for ${it.soknadId}")
+                sykepengesoknadBrukernotifikasjonService.handterSykepengesoknad(it.sisteSoknad!!)
             } else if (it.sisteSoknad!!.skalSendeDoneMelding() && database.finnBrukernotifikasjon(it.soknadId) != null && database.finnBrukernotifikasjon(it.soknadId)?.doneSendt == null) {
-                log.info("DRY RUN - SpoleService ville sendt done melding for ${it.soknadId}")
+                log.info("SpoleService sender done melding for ${it.soknadId}")
+                sykepengesoknadBrukernotifikasjonService.handterSykepengesoknad(it.sisteSoknad!!)
             } else {
-                log.info("DRY RUN - SpoleService gikk til else for ${it.soknadId}, skal ikke skje!")
+                log.info("SpoleService gikk til else for ${it.soknadId}, skal ikke skje!")
             }
         }
     }
@@ -145,7 +147,6 @@ class SpoleService(
             Rebehandling(soknadId = "9e33fe59-1904-4298-86cb-7bc7e59daf4c"),
             Rebehandling(soknadId = "63abb776-60d4-454e-add1-f95cf12c6264"),
             Rebehandling(soknadId = "525f6ed9-409f-4914-857f-7052598ceb76"),
-            Rebehandling(soknadId = "94c79950-46a7-4958-a925-53e2b037b021"),
             Rebehandling(soknadId = "94c79950-46a7-4958-a925-53e2b037b021"),
             Rebehandling(soknadId = "ba2b1120-a76c-441d-937d-bc68a7ef9f19"),
             Rebehandling(soknadId = "20466234-8c4a-4ca9-9a1e-6aae7f7ab74f"),
