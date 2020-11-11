@@ -17,8 +17,7 @@ data class Environment(
     val sykepengesoknadFrontend: String = getEnvVar("SYKEPENGESOKNAD_FRONTEND_URL"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "15000").toLong(),
-    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none"),
-    val electorPath: String = getEnvVar("ELECTOR_PATH")
+    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none")
 ) : KafkaConfig {
 
     fun hentKafkaCredentials(): KafkaCredentials {

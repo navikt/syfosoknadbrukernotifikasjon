@@ -15,13 +15,11 @@ import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.util.KafkaClients
-import no.nav.syfo.application.util.PodLeaderCoordinator
 import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
 import no.nav.syfo.db.Database
 import no.nav.syfo.kafka.envOverrides
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.soknad.kafka.SyfosoknadKafkaPoller
-import no.nav.syfo.soknad.service.SpoleService
 import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -72,17 +70,6 @@ fun main() {
 
     createListener(applicationState) {
         sykepengesoknadBrukernotifikasjonService.start()
-    }
-
-    val spoleService = SpoleService(
-        podLeaderCoordinator = PodLeaderCoordinator(env = env),
-        database = database,
-        applicationState = applicationState,
-        env = env,
-        sykepengesoknadBrukernotifikasjonService = sykepengesoknadBrukernotifikasjonService
-    )
-    GlobalScope.launch {
-        spoleService.start()
     }
 }
 
