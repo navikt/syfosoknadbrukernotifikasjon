@@ -22,10 +22,8 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Topics.SYFO_SOKNAD_V2
-import no.nav.syfo.application.Topics.SYFO_SOKNAD_V3
-import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
-import no.nav.syfo.kafka.toConsumerConfig
-import no.nav.syfo.kafka.toProducerConfig
+import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
+import no.nav.syfo.kafka.skapSoknadKafkaConsumer
 import no.nav.syfo.soknad.domene.EnkelSykepengesoknad
 import no.nav.syfo.soknad.domene.Soknadsstatus
 import no.nav.syfo.soknad.domene.Soknadstype
@@ -34,65 +32,62 @@ import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService
 import no.nav.syfo.testutil.TestDB
 import no.nav.syfo.testutil.stopApplicationNårAntallKafkaMeldingerErLest
 import org.amshove.kluent.shouldEqual
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.utility.DockerImageName
 import java.time.LocalDate
-import java.util.Properties
 import java.util.UUID
 
 @KtorExperimentalAPI
 object SykepengesoknadBrukernotifikasjonVerdikjedeSpek : Spek({
 
-    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProducer>()
+    val brukernotifikasjonKafkaProducer = mockk<BrukernotifikasjonKafkaProdusent>()
     val env = mockk<Environment>()
     val testDb = TestDB()
     val etterDatabaseIProd = LocalDate.of(2020, 11, 6).atTime(11, 0)
 
     val systembruker = "srvsyfosokbrukerntf"
 
-    beforeEachTest {
+    val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
+        .withNetwork(Network.newNetwork())
+    kafka.start()
+
+    fun setupEnvMock() {
         clearAllMocks()
         every { env.serviceuserUsername } returns systembruker
         every { env.isProd() } returns false
+        every { env.kafkaSecurityProtocol } returns "PLAINTEXT"
+        every { env.kafkaAutoOffsetReset } returns "earliest"
+        every { env.kafkaBootstrapServers } returns kafka.bootstrapServers
+        every { env.serviceuserPassword } returns "pwd"
         every { env.sykepengesoknadFrontend } returns "https://tjenester-q1.nav.no/sykepengesoknad/soknader/"
         every { brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(any(), any()) } just Runs
         every { brukernotifikasjonKafkaProducer.sendDonemelding(any(), any()) } just Runs
     }
 
+    setupEnvMock()
+
+    beforeEachTest {
+        setupEnvMock()
+    }
     describe("Test hele verdikjeden") {
         with(TestApplicationEngine()) {
 
-            val kafka = KafkaContainer().withNetwork(Network.newNetwork())
-            kafka.start()
-
-            val kafkaConfig = Properties()
-            kafkaConfig.let {
-                it["bootstrap.servers"] = kafka.bootstrapServers
-                it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
-                it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-            }
-            val consumerProperties = kafkaConfig.toConsumerConfig(
-                "consumer", valueDeserializer = StringDeserializer::class
-            )
-            val producerProperties = kafkaConfig.toProducerConfig(
-                "producer", valueSerializer = StringSerializer::class
+            val syfoSoknadProducer = KafkaProducer<String, String>(
+                mapOf(
+                    ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers,
+                    ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                    ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java
+                )
             )
 
-            val syfoSoknadProducer = KafkaProducer<String, String>(producerProperties)
-
-            val syfoSoknadKafkaConsumer = spyk(KafkaConsumer<String, String>(consumerProperties))
-
-            syfoSoknadKafkaConsumer.subscribe(listOf(SYFO_SOKNAD_V2, SYFO_SOKNAD_V3))
+            val syfoSoknadKafkaConsumer = spyk(skapSoknadKafkaConsumer(env))
 
             val applicationState = ApplicationState()
             applicationState.ready = true
@@ -102,7 +97,7 @@ object SykepengesoknadBrukernotifikasjonVerdikjedeSpek : Spek({
             val syfoSoknadService = SykepengesoknadBrukernotifikasjonService(
                 applicationState = applicationState,
                 syfosoknadKafkaPoller = syfosoknadKafkaPoller,
-                brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+                brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProducer,
                 servicebruker = systembruker,
                 environment = env,
                 database = testDb

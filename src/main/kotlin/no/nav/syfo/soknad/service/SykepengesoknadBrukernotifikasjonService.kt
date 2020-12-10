@@ -6,7 +6,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.syfo.Environment
 import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProducer
+import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.syfo.db.DatabaseInterface
 import no.nav.syfo.log
 import no.nav.syfo.soknad.db.finnBrukernotifikasjon
@@ -23,7 +23,7 @@ import java.time.LocalDate
 class SykepengesoknadBrukernotifikasjonService(
     private val applicationState: ApplicationState,
     private val syfosoknadKafkaPoller: SyfosoknadKafkaPoller,
-    private val brukernotifikasjonKafkaProducer: BrukernotifikasjonKafkaProducer,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     private val servicebruker: String,
     private val database: DatabaseInterface,
     private val environment: Environment
@@ -53,7 +53,7 @@ class SykepengesoknadBrukernotifikasjonService(
             val brukernotfikasjon = database.finnBrukernotifikasjon(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
                 log.info("Sender dittnav oppgave med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+                brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
                     Nokkel(servicebruker, sykepengesoknad.id),
                     Oppgave(
                         System.currentTimeMillis(),
@@ -78,7 +78,7 @@ class SykepengesoknadBrukernotifikasjonService(
             if (brukernotfikasjon != null) {
                 if (brukernotfikasjon.doneSendt == null) {
                     log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                    brukernotifikasjonKafkaProducer.sendDonemelding(
+                    brukernotifikasjonKafkaProdusent.sendDonemelding(
                         Nokkel(servicebruker, sykepengesoknad.id),
                         Done(
                             System.currentTimeMillis(),
@@ -94,7 +94,7 @@ class SykepengesoknadBrukernotifikasjonService(
                 // Sender done meldinger slik at de vi har i produksjon i dag kan donnes ut
                 if (sykepengesoknad.kanFåDonemeldingUtenAtBrukernotfifikasjonErIDatabasen()) {
                     log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid på brukernotifikasjon vi nok har sendt tidligere")
-                    brukernotifikasjonKafkaProducer.sendDonemelding(
+                    brukernotifikasjonKafkaProdusent.sendDonemelding(
                         Nokkel(servicebruker, sykepengesoknad.id),
                         Done(
                             System.currentTimeMillis(),
