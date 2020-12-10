@@ -1,13 +1,9 @@
 package no.nav.syfo
 
-import no.nav.syfo.kafka.KafkaConfig
-import no.nav.syfo.kafka.KafkaCredentials
-
 data class Environment(
     val applicationPort: Int = getEnvVar("APPLICATION_PORT", "8080").toInt(),
     val applicationName: String = getEnvVar("NAIS_APP_NAME"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
-    override val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
     val dbHost: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_HOST"),
     val dbPort: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_PORT"),
     val dbName: String = getEnvVar("NAIS_DATABASE_SYFOSOKNADBRUKERNOTIFIKASJON_SYFOSOKNADBRUKERNOTIFIKASJON_DB_DATABASE"),
@@ -17,17 +13,11 @@ data class Environment(
     val sykepengesoknadFrontend: String = getEnvVar("SYKEPENGESOKNAD_FRONTEND_URL"),
     val serviceuserPassword: String = getEnvVar("SERVICEUSER_PASSWORD"),
     val sidecarInitialDelay: Long = getEnvVar("SIDECAR_INITIAL_DELAY", "15000").toLong(),
-    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none")
-) : KafkaConfig {
-
-    fun hentKafkaCredentials(): KafkaCredentials {
-        return object : KafkaCredentials {
-            override val kafkaPassword: String
-                get() = serviceuserPassword
-            override val kafkaUsername: String
-                get() = serviceuserUsername
-        }
-    }
+    val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+    val kafkaAutoOffsetReset: String = getEnvVar("KAFKA_AUTO_OFFSET_RESET", "none"),
+    val kafkaSecurityProtocol: String = getEnvVar("KAFKA_SECURITY_PROTOCOL", "SASL_SSL"),
+    val kafkaSchemaRegistryUrl: String = getEnvVar("KAFKA_SCHEMA_REGISTRY_URL")
+) {
 
     fun isProd(): Boolean {
         return cluster == "prod-gcp"

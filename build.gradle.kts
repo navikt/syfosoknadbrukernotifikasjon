@@ -10,7 +10,6 @@ val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.11.2"
 val javaxActivationVersion = "1.1.1"
 val postgresEmbeddedVersion = "0.13.3"
-val kafkaEmbeddedVersion = "2.4.0"
 val kluentVersion = "1.49"
 val ktorVersion = "1.3.2"
 val logbackVersion = "1.2.3"
@@ -18,7 +17,6 @@ val logstashEncoderVersion = "5.1"
 val mockkVersion = "1.10.0"
 val nimbusdsVersion = "7.5.1"
 val prometheusVersion = "0.6.0"
-val smCommonVersion = "1.7cb158e"
 val spekVersion = "2.0.9"
 val testContainerKafkaVersion = "1.15.0"
 val confluentVersion = "5.5.1"
@@ -91,7 +89,6 @@ dependencies {
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
-    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
     implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonAvroVersion")
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -119,7 +116,6 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
 
 }

@@ -14,11 +14,9 @@ import kotlinx.coroutines.launch
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
-import no.nav.syfo.application.util.KafkaClients
-import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProducer
+import no.nav.syfo.brukernotifkasjon.skapBrukernotifikasjonKafkaProdusent
 import no.nav.syfo.db.Database
-import no.nav.syfo.kafka.envOverrides
-import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.skapSoknadKafkaConsumer
 import no.nav.syfo.soknad.kafka.SyfosoknadKafkaPoller
 import no.nav.syfo.soknad.service.SykepengesoknadBrukernotifikasjonService
 import org.slf4j.Logger
@@ -37,7 +35,6 @@ val objectMapper: ObjectMapper = ObjectMapper().apply {
 fun main() {
     val env = Environment()
 
-    val kafkaClients = KafkaClients(env)
     val applicationState = ApplicationState()
 
     DefaultExports.initialize()
@@ -48,15 +45,13 @@ fun main() {
 
     val database = Database(env)
 
-    val kafkaBaseConfig = loadBaseConfig(env, env.hentKafkaCredentials()).envOverrides()
-
-    val brukernotifikasjonKafkaProducer = skapBrukernotifikasjonKafkaProducer(kafkaBaseConfig)
-    val syfosoknadKafkaPoller = SyfosoknadKafkaPoller(kafkaClients.syfoSoknadConsumer)
+    val brukernotifikasjonKafkaProdusent = skapBrukernotifikasjonKafkaProdusent(env)
+    val syfosoknadKafkaPoller = SyfosoknadKafkaPoller(skapSoknadKafkaConsumer(env))
     val sykepengesoknadBrukernotifikasjonService = SykepengesoknadBrukernotifikasjonService(
         database = database,
         applicationState = applicationState,
         syfosoknadKafkaPoller = syfosoknadKafkaPoller,
-        brukernotifikasjonKafkaProducer = brukernotifikasjonKafkaProducer,
+        brukernotifikasjonKafkaProdusent = brukernotifikasjonKafkaProdusent,
         servicebruker = "srvsyfosokbrukerntf",
         environment = env
     )
