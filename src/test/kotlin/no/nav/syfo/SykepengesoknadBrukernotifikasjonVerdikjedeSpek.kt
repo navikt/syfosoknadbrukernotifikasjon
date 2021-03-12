@@ -56,7 +56,7 @@ object SykepengesoknadBrukernotifikasjonVerdikjedeSpek : Spek({
 
     val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
         .withNetwork(Network.newNetwork())
-    kafka.start()
+        .also { it.start() }
 
     fun setupEnvMock() {
         clearAllMocks()
