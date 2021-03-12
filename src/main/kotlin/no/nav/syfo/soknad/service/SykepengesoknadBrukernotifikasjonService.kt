@@ -59,7 +59,7 @@ class SykepengesoknadBrukernotifikasjonService(
                         System.currentTimeMillis(),
                         fnr,
                         grupperingsid,
-                        "Du har en søknad om sykepenger du må fylle ut",
+                        sykepengesoknad.opprettBrukernotifikasjonTekst(),
                         "${environment.sykepengesoknadFrontend}${sykepengesoknad.id}",
                         4
                     )
@@ -130,4 +130,15 @@ class SykepengesoknadBrukernotifikasjonService(
             Soknadsstatus.KORRIGERT -> false
         }
     }
+
+    private fun EnkelSykepengesoknad.opprettBrukernotifikasjonTekst() =
+        when (this.type) {
+            Soknadstype.SELVSTENDIGE_OG_FRILANSERE,
+            Soknadstype.ARBEIDSTAKERE,
+            Soknadstype.ANNET_ARBEIDSFORHOLD,
+            Soknadstype.ARBEIDSLEDIG,
+            Soknadstype.BEHANDLINGSDAGER -> "Du har en søknad om sykepenger du må fylle ut"
+            Soknadstype.REISETILSKUDD -> "Du har en søknad om reisetilskudd du må fylle ut"
+            else -> throw IllegalArgumentException("Søknad ${this.id} er av type ${this.type} og skal ikke ha brukernotifikasjon oppgave")
+        }
 }
