@@ -22,6 +22,7 @@ import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.Topics.SYFO_SOKNAD_V2
+import no.nav.syfo.application.Topics.SYFO_SOKNAD_V3
 import no.nav.syfo.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.syfo.kafka.skapSoknadKafkaConsumer
 import no.nav.syfo.soknad.domene.EnkelSykepengesoknad
@@ -56,7 +57,7 @@ object SykepengesoknadBrukernotifikasjonVerdikjedeSpek : Spek({
 
     val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
         .withNetwork(Network.newNetwork())
-    kafka.start()
+        .also { it.start() }
 
     fun setupEnvMock() {
         clearAllMocks()
@@ -335,6 +336,91 @@ object SykepengesoknadBrukernotifikasjonVerdikjedeSpek : Spek({
                 beskjedSlot.captured.getFodselsnummer() shouldEqual fnr
                 beskjedSlot.captured.getSikkerhetsnivaa() shouldEqual 4
                 beskjedSlot.captured.getTekst() shouldEqual "Du har en søknad om sykepenger du må fylle ut"
+                beskjedSlot.captured.getLink() shouldEqual "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+                beskjedSlot.captured.getGrupperingsId() shouldEqual sykmeldingId
+
+                nokkelSlot2.captured.getEventId() shouldEqual id
+                nokkelSlot2.captured.getSystembruker() shouldEqual systembruker
+                doneSlot.captured.getFodselsnummer() shouldEqual fnr
+                doneSlot.captured.getGrupperingsId() shouldEqual sykmeldingId
+            }
+
+            it("NY og SENDT reisetilskudd mottas fra kafka topic og dittnav oppgave og done melding sendes ut") {
+
+                val id = UUID.randomUUID().toString()
+                val sykmeldingId = UUID.randomUUID().toString()
+                val enkelSoknad = EnkelSykepengesoknad(
+                    id = id,
+                    status = Soknadsstatus.NY,
+                    type = Soknadstype.REISETILSKUDD,
+                    opprettet = etterDatabaseIProd,
+                    fnr = fnr,
+                    sykmeldingId = sykmeldingId
+                )
+
+                syfoSoknadProducer.send(
+                    ProducerRecord(
+                        SYFO_SOKNAD_V3,
+                        null,
+                        id,
+                        enkelSoknad.tilJson()
+                    )
+                )
+
+                // Send samme søknad
+
+                val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+                syfoSoknadProducer.send(
+                    ProducerRecord(
+                        SYFO_SOKNAD_V3,
+                        null,
+                        id,
+                        sendtSoknad.tilJson()
+                    )
+                )
+                // Håndterer duplikat av sendt
+                syfoSoknadProducer.send(
+                    ProducerRecord(
+                        SYFO_SOKNAD_V3,
+                        null,
+                        id,
+                        sendtSoknad.tilJson()
+                    )
+                )
+
+                stopApplicationNårAntallKafkaMeldingerErLest(syfoSoknadKafkaConsumer, applicationState, 3)
+                applicationState.alive = true
+                applicationState.ready = true
+
+                runBlocking {
+                    syfoSoknadService.start()
+                }
+
+                val beskjedSlot = slot<Oppgave>()
+                val nokkelSlot = slot<Nokkel>()
+
+                verify(exactly = 1) {
+                    brukernotifikasjonKafkaProducer.opprettBrukernotifikasjonOppgave(
+                        capture(
+                            nokkelSlot
+                        ),
+                        capture(beskjedSlot)
+                    )
+                }
+                val doneSlot = slot<Done>()
+                val nokkelSlot2 = slot<Nokkel>()
+                verify(exactly = 1) {
+                    brukernotifikasjonKafkaProducer.sendDonemelding(
+                        capture(nokkelSlot2),
+                        capture(doneSlot)
+                    )
+                }
+                nokkelSlot.captured.getEventId() shouldEqual id
+                nokkelSlot.captured.getSystembruker() shouldEqual systembruker
+
+                beskjedSlot.captured.getFodselsnummer() shouldEqual fnr
+                beskjedSlot.captured.getSikkerhetsnivaa() shouldEqual 4
+                beskjedSlot.captured.getTekst() shouldEqual "Du har en søknad om reisetilskudd du må fylle ut"
                 beskjedSlot.captured.getLink() shouldEqual "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
                 beskjedSlot.captured.getGrupperingsId() shouldEqual sykmeldingId
 
