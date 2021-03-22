@@ -27,6 +27,7 @@ fun skapSoknadKafkaConsumer(env: Environment): KafkaConsumer<String, String> {
     val config = mapOf(
         ConsumerConfig.GROUP_ID_CONFIG to "syfosoknadbrukernotifikasjon-consumer",
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to env.kafkaAutoOffsetReset,
+        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
         ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1"

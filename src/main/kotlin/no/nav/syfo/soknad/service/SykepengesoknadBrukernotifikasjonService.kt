@@ -1,6 +1,5 @@
 package no.nav.syfo.soknad.service
 
-import kotlinx.coroutines.delay
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
@@ -28,15 +27,14 @@ class SykepengesoknadBrukernotifikasjonService(
     private val database: DatabaseInterface,
     private val environment: Environment
 ) {
-    suspend fun start() {
+    fun start() {
         while (applicationState.ready) {
             val consumerRecords = syfosoknadKafkaPoller.poll()
             consumerRecords.forEach {
-
                 val sykepengesoknad = it.value().tilEnkelSykepengesoknad()
                 handterSykepengesoknad(sykepengesoknad)
             }
-            delay(1)
+            syfosoknadKafkaPoller.commitOffset()
         }
     }
 

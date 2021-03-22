@@ -10,4 +10,7 @@ class SyfosoknadKafkaPoller(
     fun poll(): ConsumerRecords<String, String> {
         return syfoSoknadConsumer.poll(Duration.ofMillis(500))
     }
+    fun commitOffset() {
+        syfoSoknadConsumer.commitSync()
+    }
 }
