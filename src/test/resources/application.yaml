@@ -1,0 +1,16 @@
+logging.config: "classpath:logback-local.xml"
+
+
+spring:
+  profiles:
+    active: test
+  flyway:
+    enabled: true
+
+
+on-prem-kafka:
+  bootstrap-servers: "overrides i abstract container base test"
+  username: brukernavnet
+
+
+frontend-url: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
