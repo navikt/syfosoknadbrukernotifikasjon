@@ -1,15 +1,15 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: syfosoknadbrukernotifikasjon
-  namespace: flex
+  name: {{app}}
+  namespace: {{namespace}}
   labels:
-    team: flex
+    team: {{team}}
 spec:
   image: {{ image }}
   replicas:
-    min: 1
-    max: 1
+    min: {{minReplicas}}
+    max: {{maxReplicas}}
     cpuThresholdPercentage: 90
   port: 8080
   liveness:
@@ -42,13 +42,15 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: kafka-schema-registry.nais.adeo.no
+      {{#each externalHosts as |url|}}
+         - host: {{url}}
+      {{/each}}
+  kafka:
+    pool: {{kafkaPool}}
   envFrom:
     - secret: syfosoknadbrukernotifikasjon-serviceuser
   env:
-    - name: KAFKA_BOOTSTRAP_SERVERS_URL
-      value: SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443
-    - name: KAFKA_SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.adeo.no
-    - name: SYKEPENGESOKNAD_FRONTEND_URL
-      value: https://tjenester.nav.no/sykepengesoknad/soknader/
+  {{#each env}}
+     - name: {{@key}}
+       value: {{this}}
+  {{/each}}
