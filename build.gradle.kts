@@ -1,193 +1,91 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "no.nav.syfo"
-version = "1.0.0"
-
-val coroutinesVersion = "1.3.3"
-val jacksonVersion = "2.11.2"
-val javaxActivationVersion = "1.1.1"
-val postgresEmbeddedVersion = "0.13.3"
-val kluentVersion = "1.49"
-val ktorVersion = "1.3.2"
-val logbackVersion = "1.2.3"
-val logstashEncoderVersion = "5.1"
-val mockkVersion = "1.10.0"
-val nimbusdsVersion = "7.5.1"
-val prometheusVersion = "0.6.0"
-val spekVersion = "2.0.9"
-val testContainerKafkaVersion = "1.15.2"
-val confluentVersion = "5.5.1"
-val postgresVersion = "42.2.18"
-val flywayVersion = "7.1.1"
-val hikariVersion = "3.4.5"
-
-val brukernotifikasjonAvroVersion = "1.2020.10.05-12.29-a202d85e3986"
-
-val ktlint by configurations.creating
-
-val outputDir = "${project.buildDir}/reports/ktlint/"
-val inputFiles = project.fileTree(mapOf("dir" to "src", "include" to "**/*.kt"))
-
-tasks.withType<Jar> {
-    manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
-}
-
 plugins {
-    id("org.jmailen.kotlinter") version "2.1.1"
-    kotlin("jvm") version "1.3.70"
-    id("com.diffplug.gradle.spotless") version "3.23.1"
-    id("com.github.johnrengelman.shadow") version "4.0.4"
-    id("com.github.ben-manes.versions") version "0.29.0"
-    jacoco
+    id("org.springframework.boot") version "2.4.4"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    kotlin("jvm") version "1.4.32"
+    kotlin("plugin.spring") version "1.4.32"
 }
+
+group = "no.nav.helse.flex"
+version = "1.0.0"
+description = "syfosoknadbrukernotifikasjon"
+java.sourceCompatibility = JavaVersion.VERSION_14
 
 buildscript {
+    repositories {
+        maven("https://plugins.gradle.org/m2/")
+    }
     dependencies {
-        classpath("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-        classpath("org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438")
-        classpath("com.sun.activation:javax.activation:1.2.0")
+        classpath("org.jlleitschuh.gradle:ktlint-gradle:10.0.0")
     }
 }
+
+apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
 val githubUser: String by project
 val githubPassword: String by project
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://kotlin.bintray.com/kotlinx")
-    maven(url = "https://jitpack.io" )
+
+    maven(url = "https://jitpack.io")
+
     maven {
-        url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
-        credentials {
-            username = githubUser
-            password = githubPassword
-        }
+        url = uri("https://maven.pkg.github.com/navikt/maven-release")
     }
 }
+
+val testContainersVersion = "1.15.2"
+val logstashLogbackEncoderVersion = "6.6"
+val kluentVersion = "1.65"
+val brukernotifikasjonAvroVersion = "1.2020.10.05-12.29-a202d85e3986"
+val confluentVersion = "6.0.1"
 
 dependencies {
-    implementation(kotlin("stdlib"))
-
-    ktlint("com.pinterest:ktlint:0.37.2")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:$coroutinesVersion")
-    implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
-    implementation("io.prometheus:simpleclient_common:$prometheusVersion")
-
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache:$ktorVersion")
-    implementation("io.ktor:ktor-client-auth-basic:$ktorVersion")
-    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
-    implementation("io.ktor:ktor-jackson:$ktorVersion")
-
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.slf4j:slf4j-api")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonAvroVersion")
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
 
-    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonAvroVersion")
-
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
-
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-
-    implementation("org.postgresql:postgresql:$postgresVersion")
-    implementation("com.zaxxer:HikariCP:$hikariVersion")
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
-    testImplementation("com.nimbusds:nimbus-jose-jwt:$nimbusdsVersion")
-    testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
-        exclude(group = "org.eclipse.jetty")
-    }
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
-
-    testImplementation("com.opentable.components:otj-pg-embedded:$postgresEmbeddedVersion")
-
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:postgresql:$testContainersVersion")
+    testImplementation("org.testcontainers:kafka:$testContainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+    testImplementation("org.awaitility:awaitility")
 }
 
-val ktlintCheck by tasks.creating(JavaExec::class) {
-    inputs.files(inputFiles)
-    outputs.dir(outputDir)
-
-    description = "Check Kotlin code style."
-    classpath = ktlint
-    main = "com.pinterest.ktlint.Main"
-    args = listOf("src/**/*.kt")
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    this.archiveFileName.set("app.jar")
 }
 
-val ktlintFormat by tasks.creating(JavaExec::class) {
-    inputs.files(inputFiles)
-    outputs.dir(outputDir)
-
-    description = "Fix Kotlin code style deviations."
-    classpath = ktlint
-    main = "com.pinterest.ktlint.Main"
-    args = listOf("-F", "src/**/*.kt")
-}
-
-tasks.jacocoTestReport {
-    reports {
-        xml.isEnabled = true
-        html.isEnabled = true
-    }
-}
-
-
-tasks {
-
-    create("printVersion") {
-        println(project.version)
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "12"
-    }
-
-    withType<JacocoReport> {
-        classDirectories.setFrom(
-            sourceSets.main.get().output.asFileTree.matching {
-                exclude()
-            }
-        )
-    }
-    withType<ShadowJar> {
-        transform(ServiceFileTransformer::class.java) {
-            setPath("META-INF/cxf")
-            include("bus-extensions.txt")
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "14"
+        if (System.getenv("CI") == "true") {
+            kotlinOptions.allWarningsAsErrors = true
         }
     }
-
-    withType<Test> {
-        useJUnitPlatform {
-            includeEngines("spek2")
-        }
-        testLogging.showStandardStreams = true
-    }
-
-    "check" {
-        dependsOn("formatKotlin")
-    }
 }
-
-tasks.named("dependencyUpdates", DependencyUpdatesTask::class.java).configure {
-    // optional parameters
-    checkForGradleUpdate = true
-    outputFormatter = "json"
-    outputDir = "build/dependencyUpdates"
-    reportfileName = "report"
+tasks.withType<Test> {
+    useJUnitPlatform()
+    testLogging {
+        events("PASSED", "FAILED", "SKIPPED")
+    }
 }
