@@ -15,23 +15,17 @@ import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
-import org.springframework.kafka.listener.ContainerProperties
 import java.io.Serializable
 import java.util.HashMap
 
@@ -47,31 +41,6 @@ class OnPremTestKafkaConfig(
             BOOTSTRAP_SERVERS_CONFIG to kafkaBootstrapServers,
             SECURITY_PROTOCOL_CONFIG to "PLAINTEXT"
         )
-    }
-
-    @Bean
-    fun consumerFactory(): ConsumerFactory<String, String> {
-        val config = mapOf(
-            ConsumerConfig.GROUP_ID_CONFIG to "syfosoknadbrukernotifikasjon-consumer",
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "latest",
-            ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
-            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1"
-        ) + commonConfig()
-        return DefaultKafkaConsumerFactory(config)
-    }
-
-    @Bean
-    fun onpremKafkaListenerContainerFactory(
-        consumerFactory: ConsumerFactory<String, String>,
-        kafkaErrorHandler: KafkaErrorHandler
-    ): ConcurrentKafkaListenerContainerFactory<String, String> {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = consumerFactory
-        factory.setErrorHandler(kafkaErrorHandler)
-        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
-        return factory
     }
 
     private fun producerConfig(): Map<String, Serializable> {
@@ -91,15 +60,6 @@ class OnPremTestKafkaConfig(
             AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to "http://whatever.nav",
             SaslConfigs.SASL_MECHANISM to "PLAIN"
         ) + producerConfig() + commonConfig()
-    }
-
-    @Bean
-    fun onPremKafkaProducer(): KafkaProducer<String, String> {
-        val conf = mapOf(
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-        ) + producerConfig() + commonConfig()
-        return KafkaProducer(conf)
     }
 
     @Bean

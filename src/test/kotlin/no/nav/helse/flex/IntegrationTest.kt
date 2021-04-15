@@ -4,8 +4,6 @@ import no.nav.helse.flex.db.BrukernotifikasjonRepository
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
-import no.nav.helse.flex.kafka.SYFO_SOKNAD_V2
-import no.nav.helse.flex.kafka.SYFO_SOKNAD_V3
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -17,9 +15,6 @@ import java.time.LocalDate
 import java.util.*
 
 class IntegrationTest : AbstractContainerBaseTest() {
-
-    @Autowired
-    private lateinit var onPremKafkaProducer: KafkaProducer<String, String>
 
     @Autowired
     private lateinit var aivenKafkaProducer: KafkaProducer<String, String>
@@ -44,9 +39,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
             sykmeldingId = sykmeldingId
         )
 
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 enkelSoknad.serialisertTilString()
@@ -86,18 +81,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
         brukernotifikasjonDb.fnr shouldBeEqualTo fnr
         brukernotifikasjonDb.oppgaveSendt.shouldNotBeNull()
         brukernotifikasjonDb.doneSendt.shouldBeNull()
-
-        aivenKafkaProducer.send(
-            ProducerRecord(
-                SYKEPENGESOKNAD_TOPIC,
-                null,
-                id,
-                enkelSoknad.serialisertTilString()
-            )
-        )
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -113,9 +96,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
             sykmeldingId = sykmeldingId
         )
 
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 enkelSoknad.serialisertTilString()
@@ -150,9 +133,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
             sykmeldingId = sykmeldingId
         )
 
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 enkelSoknad.serialisertTilString()
@@ -177,9 +160,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
             sykmeldingId = sykmeldingId
         )
 
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 enkelSoknad.serialisertTilString()
@@ -188,18 +171,18 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
         // Send samme søknad
         val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 sendtSoknad.serialisertTilString()
             )
         )
         // Håndterer duplikat av sendt
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V2,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 sendtSoknad.serialisertTilString()
@@ -230,18 +213,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
         doneNokkel.getSystembruker() shouldBeEqualTo systembruker
         done.getFodselsnummer() shouldBeEqualTo fnr
         done.getGrupperingsId() shouldBeEqualTo sykmeldingId
-
-        aivenKafkaProducer.send(
-            ProducerRecord(
-                SYKEPENGESOKNAD_TOPIC,
-                null,
-                id,
-                enkelSoknad.serialisertTilString()
-            )
-        )
-
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -258,9 +229,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
             sykmeldingId = sykmeldingId
         )
 
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V3,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 enkelSoknad.serialisertTilString()
@@ -270,18 +241,18 @@ class IntegrationTest : AbstractContainerBaseTest() {
         // Send samme søknad
 
         val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V3,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 sendtSoknad.serialisertTilString()
             )
         )
         // Håndterer duplikat av sendt
-        onPremKafkaProducer.send(
+        aivenKafkaProducer.send(
             ProducerRecord(
-                SYFO_SOKNAD_V3,
+                SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
                 sendtSoknad.serialisertTilString()

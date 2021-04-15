@@ -11,7 +11,6 @@ spring:
 KAFKA_TRUSTSTORE_PATH: ""
 KAFKA_CREDSTORE_PASSWORD: ""
 KAFKA_KEYSTORE_PATH: ""
-KAFKA_AUTO_OFFSET_RESET: "earliest"
 
 aiven-kafka:
   auto-offest-reset: latest

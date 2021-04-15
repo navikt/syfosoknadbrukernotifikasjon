@@ -26,7 +26,6 @@ class SykepengesoknadBrukernotifikasjonService(
 
     val log = logger()
 
-    @Synchronized
     fun handterSykepengesoknad(sykepengesoknadSomString: String) {
 
         val sykepengesoknad = sykepengesoknadSomString.tilEnkelSykepengesoknad()
