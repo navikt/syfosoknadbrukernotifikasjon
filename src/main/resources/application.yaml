@@ -19,10 +19,9 @@ on-prem-kafka:
   security-protocol: SASL_SSL
   username: ${SERVICEUSER_USERNAME}
   password: ${SERVICEUSER_PASSWORD}
-  auto-offest-reset: none
 
 aiven-kafka:
-  auto-offest-reset: latest
+  auto-offest-reset: none
   security-protocol: SSL
 
 
