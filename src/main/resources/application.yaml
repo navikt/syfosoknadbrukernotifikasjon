@@ -21,6 +21,11 @@ on-prem-kafka:
   password: ${SERVICEUSER_PASSWORD}
   auto-offest-reset: none
 
+aiven-kafka:
+  auto-offest-reset: latest
+  security-protocol: SSL
+
+
 frontend-url: ${SYKEPENGESOKNAD_FRONTEND_URL}
 
 management:

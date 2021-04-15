@@ -63,7 +63,7 @@ class OnPremTestKafkaConfig(
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(
+    fun onpremKafkaListenerContainerFactory(
         consumerFactory: ConsumerFactory<String, String>,
         kafkaErrorHandler: KafkaErrorHandler
     ): ConcurrentKafkaListenerContainerFactory<String, String> {
@@ -94,7 +94,7 @@ class OnPremTestKafkaConfig(
     }
 
     @Bean
-    fun kafkaProducer(): KafkaProducer<String, String> {
+    fun onPremKafkaProducer(): KafkaProducer<String, String> {
         val conf = mapOf(
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
