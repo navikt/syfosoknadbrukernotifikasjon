@@ -5,7 +5,6 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
-import no.nav.helse.flex.logger
 import org.apache.kafka.clients.CommonClientConfigs.*
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -33,7 +32,6 @@ class OnPremKafkaConfig(
 
 ) {
 
-    val log = logger()
     private fun commonConfig(): Map<String, String> {
         return mapOf(
             BOOTSTRAP_SERVERS_CONFIG to kafkaBootstrapServers,
@@ -57,7 +55,7 @@ class OnPremKafkaConfig(
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(
+    fun onpremKafkaListenerContainerFactory(
         consumerFactory: ConsumerFactory<String, String>,
         kafkaErrorHandler: KafkaErrorHandler
     ): ConcurrentKafkaListenerContainerFactory<String, String> {
