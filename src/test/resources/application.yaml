@@ -13,7 +13,7 @@ KAFKA_CREDSTORE_PASSWORD: ""
 KAFKA_KEYSTORE_PATH: ""
 
 aiven-kafka:
-  auto-offest-reset: latest
+  auto-offset-reset: latest
   security-protocol: PLAINTEXT
 
 on-prem-kafka:

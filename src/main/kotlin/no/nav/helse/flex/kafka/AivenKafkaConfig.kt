@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 class AivenKafkaConfig(
     @Value("\${KAFKA_BROKERS}") private val kafkaBrokers: String,
     @Value("\${KAFKA_TRUSTSTORE_PATH}") private val kafkaTruststorePath: String,
-    @Value("\${aiven-kafka.auto-offest-reset}") private val kafkaAutoOffsetReset: String,
+    @Value("\${aiven-kafka.auto-offset-reset}") private val kafkaAutoOffsetReset: String,
     @Value("\${aiven-kafka.security-protocol}") private val kafkaSecurityProtocol: String,
 
     @Value("\${KAFKA_CREDSTORE_PASSWORD}") private val kafkaCredstorePassword: String,
