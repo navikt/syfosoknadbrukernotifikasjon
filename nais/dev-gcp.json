@@ -11,6 +11,6 @@
   "env": {
     "KAFKA_BOOTSTRAP_SERVERS_URL": "SSL://b27apvl00045.preprod.local:8443,SSL://b27apvl00046.preprod.local:8443,SSL://b27apvl00047.preprod.local:8443",
     "KAFKA_SCHEMA_REGISTRY_URL": "https://kafka-schema-registry.nais-q.adeo.no",
-    "SYKEPENGESOKNAD_FRONTEND_URL": "https://tjenester-q1.nav.no/sykepengesoknad/soknader/"
+    "SYKEPENGESOKNAD_FRONTEND_URL": "https://www-gcp.dev.nav.no/syk/sykepengesoknad/soknader/"
   }
 }
