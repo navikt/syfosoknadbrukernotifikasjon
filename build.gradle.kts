@@ -39,7 +39,7 @@ repositories {
 
 val testContainersVersion = "1.15.3"
 val logstashLogbackEncoderVersion = "6.6"
-val kluentVersion = "1.65"
+val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2020.10.05-12.29-a202d85e3986"
 val confluentVersion = "6.1.1"
 
