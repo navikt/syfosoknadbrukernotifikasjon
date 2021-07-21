@@ -128,6 +128,7 @@ class SykepengesoknadBrukernotifikasjonService(
             Soknadstype.ARBEIDSLEDIG,
             Soknadstype.BEHANDLINGSDAGER -> "Du har en søknad om sykepenger du må fylle ut"
             Soknadstype.REISETILSKUDD -> "Du har en søknad om reisetilskudd du må fylle ut"
+            Soknadstype.GRADERT_REISETILSKUDD -> "Du har en søknad om sykepenger med reisetilskudd du må fylle ut"
             else -> throw IllegalArgumentException("Søknad ${this.id} er av type ${this.type} og skal ikke ha brukernotifikasjon oppgave")
         }
 }
