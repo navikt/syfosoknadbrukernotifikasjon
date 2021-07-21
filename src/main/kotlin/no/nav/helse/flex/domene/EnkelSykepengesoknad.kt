@@ -29,7 +29,8 @@ enum class Soknadstype {
     ANNET_ARBEIDSFORHOLD,
     ARBEIDSLEDIG,
     BEHANDLINGSDAGER,
-    REISETILSKUDD
+    REISETILSKUDD,
+    GRADERT_REISETILSKUDD,
 }
 
 fun String.tilEnkelSykepengesoknad(): EnkelSykepengesoknad = objectMapper.readValue(this)
