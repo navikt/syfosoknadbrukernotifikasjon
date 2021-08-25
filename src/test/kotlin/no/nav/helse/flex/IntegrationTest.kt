@@ -74,6 +74,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
         oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        oppgave.getEksternVarsling().`should be false`()
+        oppgave.getPrefererteKanaler().shouldBeEmpty()
 
         val brukernotifikasjonDb = brukernotifikasjonRepository.findByIdOrNull(id)!!
         brukernotifikasjonDb.grupperingsid shouldBeEqualTo sykmeldingId
