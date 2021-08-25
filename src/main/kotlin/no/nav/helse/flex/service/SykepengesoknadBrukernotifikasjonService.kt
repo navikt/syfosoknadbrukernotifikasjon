@@ -2,7 +2,9 @@ package no.nav.helse.flex.service
 
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.brukernotifikasjon.schemas.builders.DoneBuilder
+import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
+import no.nav.brukernotifikasjon.schemas.builders.OppgaveBuilder
 import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
@@ -13,8 +15,8 @@ import no.nav.helse.flex.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.time.LocalDate
+import java.net.URL
+import java.time.*
 
 @Component
 class SykepengesoknadBrukernotifikasjonService(
@@ -42,17 +44,24 @@ class SykepengesoknadBrukernotifikasjonService(
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
                 log.info("Sender dittnav oppgave med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(
-                    Nokkel(servicebruker, sykepengesoknad.id),
-                    Oppgave(
-                        System.currentTimeMillis(),
-                        fnr,
-                        grupperingsid,
-                        sykepengesoknad.opprettBrukernotifikasjonTekst(),
-                        "${sykepengesoknadFrontend}${sykepengesoknad.id}",
-                        4
-                    )
-                )
+                val oppgave = OppgaveBuilder()
+                    .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
+                    .withFodselsnummer(fnr)
+                    .withGrupperingsId(grupperingsid)
+                    .withTekst(sykepengesoknad.opprettBrukernotifikasjonTekst())
+                    .withLink(URL("${sykepengesoknadFrontend}${sykepengesoknad.id}"))
+                    .withSikkerhetsnivaa(4)
+                    .withEksternVarsling(false)
+                    .withPrefererteKanaler()
+                    .build()
+
+                val nokkel = NokkelBuilder()
+                    .withSystembruker(servicebruker)
+                    .withEventId(sykepengesoknad.id)
+                    .build()
+
+                brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(nokkel, oppgave)
+
                 brukernotifikasjonRepository.insert(
                     soknadsid = sykepengesoknad.id,
                     grupperingsid = grupperingsid,
@@ -67,14 +76,18 @@ class SykepengesoknadBrukernotifikasjonService(
             if (brukernotfikasjon != null) {
                 if (brukernotfikasjon.doneSendt == null) {
                     log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                    brukernotifikasjonKafkaProdusent.sendDonemelding(
-                        Nokkel(servicebruker, sykepengesoknad.id),
-                        Done(
-                            System.currentTimeMillis(),
-                            fnr,
-                            grupperingsid
-                        )
-                    )
+                    val nokkel = NokkelBuilder()
+                        .withSystembruker(servicebruker)
+                        .withEventId(sykepengesoknad.id)
+                        .build()
+
+                    val done = DoneBuilder()
+                        .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
+                        .withGrupperingsId(grupperingsid)
+                        .withFodselsnummer(fnr)
+                        .build()
+
+                    brukernotifikasjonKafkaProdusent.sendDonemelding(nokkel, done)
                     brukernotifikasjonRepository.save(brukernotfikasjon.copy(doneSendt = Instant.now()))
                 } else {
                     log.info("Har allerede sendt brukernotifikasjon done melding for søknad med id  ${sykepengesoknad.id}")

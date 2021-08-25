@@ -68,7 +68,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         nokkel.getSystembruker() shouldBeEqualTo systembruker
 
         val oppgave = oppgaver[0].value()
-
+        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
         oppgave.getFodselsnummer() shouldBeEqualTo fnr
         oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
@@ -116,6 +116,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         val done = dones[0].value()
         done.getFodselsnummer() shouldBeEqualTo fnr
         done.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
 
         brukernotifikasjonRepository.findByIdOrNull(id).shouldBeNull()
     }
@@ -205,6 +206,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
         oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
@@ -213,6 +215,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         doneNokkel.getSystembruker() shouldBeEqualTo systembruker
         done.getFodselsnummer() shouldBeEqualTo fnr
         done.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
     }
 
     @Test
@@ -276,6 +279,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
         oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
@@ -284,5 +288,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
         doneNokkel.getSystembruker() shouldBeEqualTo systembruker
         done.getFodselsnummer() shouldBeEqualTo fnr
         done.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
     }
 }
