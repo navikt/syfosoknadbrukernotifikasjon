@@ -1,6 +1,7 @@
 package no.nav.helse.flex.db
 
 import no.nav.helse.flex.domene.Brukernotifikasjon
+import no.nav.helse.flex.domene.Soknadstype
 import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.CrudRepository
@@ -13,9 +14,11 @@ interface BrukernotifikasjonRepository : CrudRepository<Brukernotifikasjon, Stri
     @Modifying
     @Query(
         """
-            INSERT INTO brukernotifikasjon(SOKNADSID, GRUPPERINGSID, FNR, OPPGAVE_SENDT)
-            VALUES (:soknadsid, :grupperingsid, :fnr, :oppgaveSendt )
+            INSERT INTO brukernotifikasjon(SOKNADSID, GRUPPERINGSID, FNR, UTSENDELSESTIDSPUNKT, SOKNADSTYPE, EKSTERNT_VARSEL)
+            VALUES (:soknadsid, :grupperingsid, :fnr, :utsendelsestidspunkt, :soknadstype, :eksterntVarsel )
             """
     )
-    fun insert(soknadsid: String, grupperingsid: String, fnr: String, oppgaveSendt: Instant?)
+    fun insert(soknadsid: String, grupperingsid: String, fnr: String, utsendelsestidspunkt: Instant?, soknadstype: Soknadstype, eksterntVarsel: Boolean)
+
+    fun findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now: Instant): List<Brukernotifikasjon>
 }

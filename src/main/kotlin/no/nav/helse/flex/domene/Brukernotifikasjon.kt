@@ -8,6 +8,9 @@ data class Brukernotifikasjon(
     val soknadsid: String,
     val grupperingsid: String,
     val fnr: String,
-    val oppgaveSendt: Instant,
-    val doneSendt: Instant?
+    val soknadstype: Soknadstype?,
+    val eksterntVarsel: Boolean,
+    val oppgaveSendt: Instant?,
+    val doneSendt: Instant?,
+    val utsendelsestidspunkt: Instant?,
 )
