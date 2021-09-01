@@ -8,7 +8,7 @@ data class EnkelSykepengesoknad(
     val id: String,
     val status: Soknadsstatus,
     val type: Soknadstype,
-    val fnr: String?,
+    val fnr: String,
     val sykmeldingId: String?,
     val opprettet: LocalDateTime
 )

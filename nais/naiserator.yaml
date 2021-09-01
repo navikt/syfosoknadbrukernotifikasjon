@@ -47,6 +47,7 @@ spec:
       {{/each}}
   kafka:
     pool: {{kafkaPool}}
+  leaderElection: true
   envFrom:
     - secret: syfosoknadbrukernotifikasjon-serviceuser
   env:

@@ -25,3 +25,4 @@ on-prem-kafka:
 
 
 frontend-url: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
+elector.path: dont_look_for_leader
