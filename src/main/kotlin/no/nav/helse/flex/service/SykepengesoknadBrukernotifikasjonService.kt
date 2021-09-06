@@ -38,22 +38,17 @@ class SykepengesoknadBrukernotifikasjonService(
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
 
-                val eksterntVarsel = sykepengesoknad.skalFåEksterntVarselViaBrukernotifikasjon()
-                val utsendelsestidspunkt = if (eksterntVarsel) {
-                    finnUtsendelsestidspunktFraNåværendeTidspunkt()
-                } else {
-                    ZonedDateTime.now(osloZone)
-                }
+                val utsendelsestidspunkt = finnUtsendelsestidspunktFraNåværendeTidspunkt()
 
                 brukernotifikasjonRepository.insert(
                     soknadsid = sykepengesoknad.id,
                     grupperingsid = grupperingsid,
                     fnr = fnr,
                     utsendelsestidspunkt = utsendelsestidspunkt.toInstant(),
-                    eksterntVarsel = eksterntVarsel,
+                    eksterntVarsel = true,
                     soknadstype = sykepengesoknad.type
                 )
-                log.info("Lagrer ditt nav oppgave med id ${sykepengesoknad.id}, utsendelsestidspunkt $utsendelsestidspunkt, eksternt varsel: $eksterntVarsel")
+                log.info("Lagrer ditt nav oppgave med id ${sykepengesoknad.id}, utsendelsestidspunkt $utsendelsestidspunkt, eksternt varsel: true")
             } else {
                 log.info("Har allerede prossesert søknad med id  ${sykepengesoknad.id}")
             }
@@ -98,10 +93,6 @@ class SykepengesoknadBrukernotifikasjonService(
             ZonedDateTime.of(LocalDate.now(), påDagtid, osloZone)
         }
     }
-}
-
-private fun EnkelSykepengesoknad.skalFåEksterntVarselViaBrukernotifikasjon(): Boolean {
-    return this.opprettet.isAfter(LocalDate.of(2021, 9, 2).atTime(11, 0))
 }
 
 private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {

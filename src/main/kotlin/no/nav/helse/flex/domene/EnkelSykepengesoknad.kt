@@ -2,7 +2,6 @@ package no.nav.helse.flex.domene
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.objectMapper
-import java.time.LocalDateTime
 
 data class EnkelSykepengesoknad(
     val id: String,
@@ -10,7 +9,6 @@ data class EnkelSykepengesoknad(
     val type: Soknadstype,
     val fnr: String,
     val sykmeldingId: String?,
-    val opprettet: LocalDateTime
 )
 
 enum class Soknadsstatus {
