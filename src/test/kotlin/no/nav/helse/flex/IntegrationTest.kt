@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Instant
-import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -30,80 +29,9 @@ class IntegrationTest : AbstractContainerBaseTest() {
     @Autowired
     private lateinit var brukernotifikasjonUtsendendelseService: BrukernotifikasjonUtsendendelseService
 
-    val førEksterntVarsel = LocalDate.of(2021, 8, 31).atTime(11, 0)
-    val etterEksterntVarsel = LocalDate.of(2021, 9, 2).atTime(11, 3)
     val fnr = "13068700000"
     val systembruker = "brukernavnet"
     val omToDager = OffsetDateTime.now().plusDays(2).toInstant()
-
-    @Test
-    fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut uten eksternt varsel`() {
-        val id = UUID.randomUUID().toString()
-        val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.NY,
-            type = Soknadstype.ARBEIDSTAKERE,
-            opprettet = førEksterntVarsel,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
-
-        aivenKafkaProducer.send(
-            ProducerRecord(
-                SYKEPENGESOKNAD_TOPIC,
-                null,
-                id,
-                enkelSoknad.serialisertTilString()
-            )
-        )
-
-        // Håndterer duplikat
-        aivenKafkaProducer.send(
-            ProducerRecord(
-                SYKEPENGESOKNAD_TOPIC,
-                null,
-                id,
-                enkelSoknad.serialisertTilString()
-            )
-        )
-
-        await().until {
-            val tilUtsendelse =
-                brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    Instant.now()
-                )
-            tilUtsendelse.size == 1
-        }
-
-        brukernotifikasjonUtsendendelseService.prosseserVedtak(omToDager)
-
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
-
-        oppgaver.shouldHaveSize(1)
-
-        val nokkel = oppgaver[0].key()
-        nokkel.getEventId() shouldBeEqualTo id
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
-
-        val oppgave = oppgaver[0].value()
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        oppgave.getEksternVarsling().`should be false`()
-        oppgave.getPrefererteKanaler().shouldBeEmpty()
-
-        val brukernotifikasjonDb = brukernotifikasjonRepository.findByIdOrNull(id)!!
-        brukernotifikasjonDb.grupperingsid shouldBeEqualTo sykmeldingId
-        brukernotifikasjonDb.soknadsid shouldBeEqualTo id
-        brukernotifikasjonDb.fnr shouldBeEqualTo fnr
-        brukernotifikasjonDb.oppgaveSendt.shouldNotBeNull()
-        brukernotifikasjonDb.doneSendt.shouldBeNull()
-    }
 
     @Test
     fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut med eksternt varsel`() {
@@ -113,7 +41,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
             id = id,
             status = Soknadsstatus.NY,
             type = Soknadstype.ARBEIDSTAKERE,
-            opprettet = etterEksterntVarsel,
             fnr = fnr,
             sykmeldingId = sykmeldingId
         )
@@ -184,7 +111,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
             id = id,
             status = Soknadsstatus.SENDT,
             type = Soknadstype.ARBEIDSTAKERE,
-            opprettet = førEksterntVarsel,
             fnr = fnr,
             sykmeldingId = sykmeldingId
         )
@@ -211,7 +137,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
             id = id,
             status = Soknadsstatus.NY,
             type = Soknadstype.ARBEIDSTAKERE,
-            opprettet = førEksterntVarsel,
             fnr = fnr,
             sykmeldingId = sykmeldingId
         )
@@ -227,7 +152,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    Instant.now()
+                    omToDager
                 )
             tilUtsendelse.size == 1
         }
@@ -292,7 +217,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
             id = id,
             status = Soknadsstatus.NY,
             type = Soknadstype.REISETILSKUDD,
-            opprettet = førEksterntVarsel,
             fnr = fnr,
             sykmeldingId = sykmeldingId
         )
@@ -308,7 +232,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    Instant.now()
+                    omToDager
                 )
             tilUtsendelse.size == 1
         }
@@ -373,7 +297,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
             id = id,
             status = Soknadsstatus.NY,
             type = Soknadstype.ARBEIDSTAKERE,
-            opprettet = førEksterntVarsel,
             fnr = fnr,
             sykmeldingId = sykmeldingId
         )
@@ -389,7 +312,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    Instant.now()
+                    omToDager
                 )
             tilUtsendelse.size == 1
         }
@@ -408,7 +331,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    Instant.now()
+                    omToDager
                 )
             tilUtsendelse.isEmpty()
         }
