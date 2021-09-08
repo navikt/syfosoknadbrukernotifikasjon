@@ -1,13 +1,12 @@
-package no.nav.helse.flex.service
+package no.nav.helse.flex.brukernotifikasjon
 
 import no.nav.brukernotifikasjon.schemas.builders.DoneBuilder
 import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
+import no.nav.helse.flex.kafka.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.util.minuttMellom0og59
 import no.nav.helse.flex.util.osloZone
@@ -18,7 +17,7 @@ import org.springframework.stereotype.Component
 import java.time.*
 
 @Component
-class SykepengesoknadBrukernotifikasjonService(
+class BrukernotifikasjonPlanlegger(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     @Value("\${on-prem-kafka.username}") val servicebruker: String,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
@@ -26,7 +25,7 @@ class SykepengesoknadBrukernotifikasjonService(
 
     val log = logger()
 
-    fun handterSykepengesoknad(sykepengesoknadSomString: String) {
+    fun planleggBrukernotfikasjon(sykepengesoknadSomString: String) {
 
         val sykepengesoknad = sykepengesoknadSomString.tilEnkelSykepengesoknad()
 

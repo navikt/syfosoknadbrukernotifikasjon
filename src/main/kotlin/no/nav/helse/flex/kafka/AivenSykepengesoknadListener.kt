@@ -1,6 +1,6 @@
 package no.nav.helse.flex.kafka
 
-import no.nav.helse.flex.service.SykepengesoknadBrukernotifikasjonService
+import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonPlanlegger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -10,7 +10,7 @@ const val SYKEPENGESOKNAD_TOPIC = "flex." + "sykepengesoknad"
 
 @Component
 class AivenSykepengesoknadListener(
-    private val sykepengesoknadBrukernotifikasjonService: SykepengesoknadBrukernotifikasjonService,
+    private val brukernotifikasjonPlanlegger: BrukernotifikasjonPlanlegger,
 ) {
 
     @KafkaListener(
@@ -19,7 +19,7 @@ class AivenSykepengesoknadListener(
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
 
-        sykepengesoknadBrukernotifikasjonService.handterSykepengesoknad(cr.value())
+        brukernotifikasjonPlanlegger.planleggBrukernotfikasjon(cr.value())
         acknowledgment.acknowledge()
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.helse.flex.brukernotifkasjon
+package no.nav.helse.flex.kafka
 
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
