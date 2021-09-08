@@ -3,8 +3,8 @@ package no.nav.helse.flex
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
-import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
-import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
+import no.nav.helse.flex.kafka.DONE_TOPIC
+import no.nav.helse.flex.kafka.OPPGAVE_TOPIC
 import org.amshove.kluent.shouldBeEmpty
 import org.apache.kafka.clients.consumer.Consumer
 import org.junit.jupiter.api.AfterAll

@@ -1,4 +1,4 @@
-package no.nav.helse.flex.db
+package no.nav.helse.flex.brukernotifikasjon
 
 import no.nav.helse.flex.domene.Brukernotifikasjon
 import no.nav.helse.flex.domene.Soknadstype

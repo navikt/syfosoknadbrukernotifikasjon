@@ -9,8 +9,6 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.brukernotifikasjon.schemas.Done
 import no.nav.brukernotifikasjon.schemas.Nokkel
 import no.nav.brukernotifikasjon.schemas.Oppgave
-import no.nav.helse.flex.brukernotifkasjon.DONE_TOPIC
-import no.nav.helse.flex.brukernotifkasjon.OPPGAVE_TOPIC
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.consumer.Consumer

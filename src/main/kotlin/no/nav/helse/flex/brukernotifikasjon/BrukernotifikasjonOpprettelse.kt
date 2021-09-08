@@ -1,12 +1,11 @@
-package no.nav.helse.flex.cronjob
+package no.nav.helse.flex.brukernotifikasjon
 
 import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
 import no.nav.brukernotifikasjon.schemas.builders.OppgaveBuilder
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
-import no.nav.helse.flex.brukernotifkasjon.BrukernotifikasjonKafkaProdusent
-import no.nav.helse.flex.db.*
 import no.nav.helse.flex.domene.Brukernotifikasjon
 import no.nav.helse.flex.domene.Soknadstype
+import no.nav.helse.flex.kafka.BrukernotifikasjonKafkaProdusent
 import no.nav.helse.flex.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
@@ -17,7 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Service
-class BrukernotifikasjonUtsendendelseService(
+class BrukernotifikasjonOpprettelse(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     @Value("\${on-prem-kafka.username}") val servicebruker: String,
     @Value("\${frontend-url}") val sykepengesoknadFrontend: String,
@@ -26,7 +25,7 @@ class BrukernotifikasjonUtsendendelseService(
 
     val log = logger()
 
-    fun prosseserVedtak(now: Instant = Instant.now()) {
+    fun opprettBrukernotifikasjoner(now: Instant = Instant.now()) {
         val brukernotifikasjoner =
             brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now)
 

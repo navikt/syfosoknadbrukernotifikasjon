@@ -1,8 +1,8 @@
 package no.nav.helse.flex
 
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
-import no.nav.helse.flex.cronjob.BrukernotifikasjonUtsendendelseService
-import no.nav.helse.flex.db.BrukernotifikasjonRepository
+import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
+import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
@@ -27,7 +27,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     private lateinit var brukernotifikasjonRepository: BrukernotifikasjonRepository
 
     @Autowired
-    private lateinit var brukernotifikasjonUtsendendelseService: BrukernotifikasjonUtsendendelseService
+    private lateinit var brukernotifikasjonOpprettelse: BrukernotifikasjonOpprettelse
 
     val fnr = "13068700000"
     val systembruker = "brukernavnet"
@@ -74,7 +74,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now())
             .shouldBeEmpty()
 
-        brukernotifikasjonUtsendendelseService.prosseserVedtak(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
 
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
         doneKafkaConsumer.ventPåRecords(antall = 0)
@@ -158,7 +158,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         }
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
 
-        brukernotifikasjonUtsendendelseService.prosseserVedtak(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
@@ -236,7 +236,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 )
             tilUtsendelse.size == 1
         }
-        brukernotifikasjonUtsendendelseService.prosseserVedtak(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
