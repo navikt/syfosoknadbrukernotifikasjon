@@ -1,16 +1,16 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "2.5.4"
+    id("org.springframework.boot") version "2.6.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.5.30"
-    kotlin("plugin.spring") version "1.5.30"
+    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.spring") version "1.6.10"
 }
 
 group = "no.nav.helse.flex"
 version = "1.0.0"
 description = "syfosoknadbrukernotifikasjon"
-java.sourceCompatibility = JavaVersion.VERSION_14
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 buildscript {
     repositories {
@@ -37,8 +37,8 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.16.0"
-val logstashLogbackEncoderVersion = "6.6"
+val testContainersVersion = "1.16.3"
+val logstashLogbackEncoderVersion = "7.0.1"
 val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "1.2021.08.27-09.12-f8a8cbc76319"
 val confluentVersion = "6.2.0"
@@ -77,7 +77,7 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "14"
+        jvmTarget = "17"
         if (System.getenv("CI") == "true") {
             kotlinOptions.allWarningsAsErrors = true
         }
