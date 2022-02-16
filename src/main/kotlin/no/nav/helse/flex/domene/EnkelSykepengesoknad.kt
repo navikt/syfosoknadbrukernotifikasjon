@@ -17,7 +17,8 @@ enum class Soknadsstatus {
     FREMTIDIG,
     KORRIGERT,
     AVBRUTT,
-    SLETTET
+    SLETTET,
+    UTGAATT,
 }
 
 enum class Soknadstype {

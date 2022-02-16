@@ -106,6 +106,7 @@ private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
         Soknadsstatus.SLETTET -> true
         Soknadsstatus.AVBRUTT -> true
         Soknadsstatus.SENDT -> true
+        Soknadsstatus.UTGAATT -> true
         Soknadsstatus.NY -> false
         Soknadsstatus.FREMTIDIG -> false
         Soknadsstatus.KORRIGERT -> false
