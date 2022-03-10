@@ -4,6 +4,7 @@ import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
 import no.nav.helse.flex.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class CronJob(
@@ -12,10 +13,13 @@ class CronJob(
 ) {
     val log = logger()
 
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(
+        initialDelay = 2,
+        fixedDelay = 10,
+        timeUnit = TimeUnit.MINUTES
+    )
     fun run() {
         if (leaderElection.isLeader()) {
-
             log.info("Kjører brukernotifikasjonjob")
             val antall = brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner()
             log.info("Ferdig med brukernotifikasjonjob. $antall notifikasjoner sendt")
