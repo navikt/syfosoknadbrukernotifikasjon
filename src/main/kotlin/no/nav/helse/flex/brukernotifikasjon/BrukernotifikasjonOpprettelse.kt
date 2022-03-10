@@ -24,7 +24,8 @@ class BrukernotifikasjonOpprettelse(
 
     val log = logger()
 
-    fun opprettBrukernotifikasjoner(now: Instant = Instant.now()) {
+    fun opprettBrukernotifikasjoner(now: Instant = Instant.now()): Int {
+        var antall = 0
         val brukernotifikasjoner =
             brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now)
 
@@ -65,8 +66,10 @@ class BrukernotifikasjonOpprettelse(
                         utsendelsestidspunkt = null
                     )
                 )
+                antall++
             }
         }
+        return antall
     }
 }
 
