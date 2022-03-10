@@ -1,7 +1,7 @@
 package no.nav.helse.flex.brukernotifikasjon
 
-import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
-import no.nav.brukernotifikasjon.schemas.builders.OppgaveBuilder
+import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
+import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
 import no.nav.helse.flex.domene.Brukernotifikasjon
 import no.nav.helse.flex.domene.Soknadstype
@@ -18,14 +18,14 @@ import java.time.ZoneOffset
 @Service
 class BrukernotifikasjonOpprettelse(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    @Value("\${on-prem-kafka.username}") val servicebruker: String,
     @Value("\${frontend-url}") val sykepengesoknadFrontend: String,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
 
     val log = logger()
 
-    fun opprettBrukernotifikasjoner(now: Instant = Instant.now()) {
+    fun opprettBrukernotifikasjoner(now: Instant = Instant.now()): Int {
+        var antall = 0
         val brukernotifikasjoner =
             brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now)
 
@@ -34,10 +34,8 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
-                val oppgave = OppgaveBuilder()
+                val oppgave = OppgaveInputBuilder()
                     .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-                    .withFodselsnummer(brukernotifikasjon.fnr)
-                    .withGrupperingsId(brukernotifikasjon.grupperingsid)
                     .withTekst(brukernotifikasjon.opprettBrukernotifikasjonTekst())
                     .withLink(URL("${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}"))
                     .withSikkerhetsnivaa(4)
@@ -51,9 +49,12 @@ class BrukernotifikasjonOpprettelse(
                     }
                     .build()
 
-                val nokkel = NokkelBuilder()
-                    .withSystembruker(servicebruker)
+                val nokkel = NokkelInputBuilder()
                     .withEventId(brukernotifikasjon.soknadsid)
+                    .withGrupperingsId(brukernotifikasjon.grupperingsid)
+                    .withFodselsnummer(brukernotifikasjon.fnr)
+                    .withNamespace("flex")
+                    .withAppnavn("syfosoknadbrukernotifikasjon")
                     .build()
 
                 log.info("Sender dittnav oppgave med id ${brukernotifikasjon.soknadsid} og grupperingsid ${brukernotifikasjon.grupperingsid} og eksternt varsel ${oppgave.getEksternVarsling()}")
@@ -65,8 +66,10 @@ class BrukernotifikasjonOpprettelse(
                         utsendelsestidspunkt = null
                     )
                 )
+                antall++
             }
         }
+        return antall
     }
 }
 

@@ -1,7 +1,7 @@
 package no.nav.helse.flex.brukernotifikasjon
 
-import no.nav.brukernotifikasjon.schemas.builders.DoneBuilder
-import no.nav.brukernotifikasjon.schemas.builders.NokkelBuilder
+import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder
+import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
@@ -11,7 +11,6 @@ import no.nav.helse.flex.logger
 import no.nav.helse.flex.util.minuttMellom0og59
 import no.nav.helse.flex.util.osloZone
 import no.nav.helse.flex.util.timeMellom9og15
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.*
@@ -19,7 +18,6 @@ import java.time.*
 @Component
 class BrukernotifikasjonPlanlegger(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    @Value("\${on-prem-kafka.username}") val servicebruker: String,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
 
@@ -61,15 +59,16 @@ class BrukernotifikasjonPlanlegger(
                     }
                     brukernotfikasjon.doneSendt == null -> {
                         log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                        val nokkel = NokkelBuilder()
-                            .withSystembruker(servicebruker)
+                        val nokkel = NokkelInputBuilder()
                             .withEventId(sykepengesoknad.id)
-                            .build()
-
-                        val done = DoneBuilder()
-                            .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
                             .withGrupperingsId(grupperingsid)
                             .withFodselsnummer(fnr)
+                            .withNamespace("flex")
+                            .withAppnavn("syfosoknadbrukernotifikasjon")
+                            .build()
+
+                        val done = DoneInputBuilder()
+                            .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
                             .build()
 
                         brukernotifikasjonKafkaProdusent.sendDonemelding(nokkel, done)

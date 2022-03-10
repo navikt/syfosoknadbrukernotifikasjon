@@ -19,10 +19,5 @@ aiven-kafka:
   auto-offset-reset: latest
   security-protocol: PLAINTEXT
 
-on-prem-kafka:
-  bootstrap-servers: "overrides i abstract container base test"
-  username: brukernavnet
-
-
 frontend-url: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
 elector.path: dont_look_for_leader
