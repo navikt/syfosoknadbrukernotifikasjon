@@ -7,6 +7,8 @@ metadata:
     team: {{team}}
 spec:
   image: {{ image }}
+  strategy:
+    type: Recreate
   replicas:
     min: {{minReplicas}}
     max: {{maxReplicas}}
