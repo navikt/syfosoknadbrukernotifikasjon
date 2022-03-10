@@ -83,15 +83,14 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
         val nokkel = oppgaver[0].key()
         nokkel.getEventId() shouldBeEqualTo id
-        nokkel.getSystembruker() shouldBeEqualTo systembruker
+        nokkel.getFodselsnummer() shouldBeEqualTo fnr
+        nokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
 
         val oppgave = oppgaver[0].value()
         System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
         oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
         oppgave.getEksternVarsling().`should be true`()
         oppgave.getPrefererteKanaler() shouldBeEqualTo listOf(PreferertKanal.SMS.name)
 
@@ -187,24 +186,24 @@ class IntegrationTest : AbstractContainerBaseTest() {
         dones.shouldHaveSize(1)
 
         val oppgaveNokkel = oppgaver.first().key()
+        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
+        oppgaveNokkel.getEventId() shouldBeEqualTo id
+        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+
         val oppgave = oppgaver.first().value()
         oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getSystembruker() shouldBeEqualTo systembruker
 
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
         oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
         System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
 
         doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getSystembruker() shouldBeEqualTo systembruker
-        done.getFodselsnummer() shouldBeEqualTo fnr
-        done.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
         System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
     }
 
@@ -269,22 +268,20 @@ class IntegrationTest : AbstractContainerBaseTest() {
         val oppgave = oppgaver.first().value()
 
         oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getSystembruker() shouldBeEqualTo systembruker
+        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
 
-        oppgave.getFodselsnummer() shouldBeEqualTo fnr
         oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
         oppgave.getTekst() shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
         oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getGrupperingsId() shouldBeEqualTo sykmeldingId
         System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
 
         doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getSystembruker() shouldBeEqualTo systembruker
-        done.getFodselsnummer() shouldBeEqualTo fnr
-        done.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
+        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
         System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
     }
 

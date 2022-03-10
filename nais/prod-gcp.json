@@ -9,8 +9,6 @@
     "kafka-schema-registry.nais.adeo.no"
   ],
   "env": {
-    "KAFKA_BOOTSTRAP_SERVERS_URL": "SASL_SSL://a01apvl00145.adeo.no:8443,SASL_SSL://a01apvl00146.adeo.no:8443,SASL_SSL://a01apvl00147.adeo.no:8443,SASL_SSL://a01apvl00149.adeo.no:8443",
-    "KAFKA_SCHEMA_REGISTRY_URL": "https://kafka-schema-registry.nais.adeo.no",
     "SYKEPENGESOKNAD_FRONTEND_URL": "https://www.nav.no/syk/sykepengesoknad/soknader/"
   }
 }

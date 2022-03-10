@@ -1,8 +1,8 @@
 package no.nav.helse.flex
 
-import no.nav.brukernotifikasjon.schemas.Done
-import no.nav.brukernotifikasjon.schemas.Nokkel
-import no.nav.brukernotifikasjon.schemas.Oppgave
+import no.nav.brukernotifikasjon.schemas.input.DoneInput
+import no.nav.brukernotifikasjon.schemas.input.NokkelInput
+import no.nav.brukernotifikasjon.schemas.input.OppgaveInput
 import no.nav.helse.flex.kafka.DONE_TOPIC
 import no.nav.helse.flex.kafka.OPPGAVE_TOPIC
 import org.amshove.kluent.shouldBeEmpty
@@ -33,17 +33,16 @@ abstract class AbstractContainerBaseTest {
 
             KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.1.0")).also {
                 it.start()
-                System.setProperty("on-prem-kafka.bootstrap-servers", it.bootstrapServers)
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
         }
     }
 
     @Autowired
-    lateinit var oppgaveKafkaConsumer: Consumer<Nokkel, Oppgave>
+    lateinit var oppgaveKafkaConsumer: Consumer<NokkelInput, OppgaveInput>
 
     @Autowired
-    lateinit var doneKafkaConsumer: Consumer<Nokkel, Done>
+    lateinit var doneKafkaConsumer: Consumer<NokkelInput, DoneInput>
 
     @AfterAll
     fun `Vi leser oppgave kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
