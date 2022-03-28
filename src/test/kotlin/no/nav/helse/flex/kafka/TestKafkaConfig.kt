@@ -9,6 +9,7 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.brukernotifikasjon.schemas.input.DoneInput
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.CommonClientConfigs.SECURITY_PROTOCOL_CONFIG
 import org.apache.kafka.clients.consumer.Consumer
@@ -82,26 +83,27 @@ class TestKafkaConfig(
         ConsumerConfig.GROUP_ID_CONFIG to groupId,
         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
-        ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1"
+        ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
+        KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to "http://ikke.i.bruk.nav"
     ) + commonConfig()
 
     @Bean
-    fun oppgaveKafkaConsumer(): Consumer<NokkelInput, OppgaveInput> {
+    fun oppgaveKafkaConsumer(): Consumer<GenericRecord, GenericRecord> {
         @Suppress("UNCHECKED_CAST")
         return DefaultKafkaConsumerFactory(
             testConsumerProps("oppgave-consumer"),
-            kafkaAvroDeserializer() as Deserializer<NokkelInput>,
-            kafkaAvroDeserializer() as Deserializer<OppgaveInput>
+            kafkaAvroDeserializer() as Deserializer<GenericRecord>,
+            kafkaAvroDeserializer() as Deserializer<GenericRecord>
         ).createConsumer()
     }
 
     @Bean
-    fun doneoppgaveKafkaConsumer(): Consumer<NokkelInput, DoneInput> {
+    fun doneKafkaConsumer(): Consumer<GenericRecord, GenericRecord> {
         @Suppress("UNCHECKED_CAST")
         return DefaultKafkaConsumerFactory(
             testConsumerProps("done-konsumer"),
-            kafkaAvroDeserializer() as Deserializer<NokkelInput>,
-            kafkaAvroDeserializer() as Deserializer<DoneInput>
+            kafkaAvroDeserializer() as Deserializer<GenericRecord>,
+            kafkaAvroDeserializer() as Deserializer<GenericRecord>
         ).createConsumer()
     }
 

@@ -30,7 +30,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
     private lateinit var brukernotifikasjonOpprettelse: BrukernotifikasjonOpprettelse
 
     val fnr = "13068700000"
-    val systembruker = "brukernavnet"
     val omToDager = OffsetDateTime.now().plusDays(2).toInstant()
 
     @Test
@@ -82,17 +81,17 @@ class IntegrationTest : AbstractContainerBaseTest() {
         oppgaver.shouldHaveSize(1)
 
         val nokkel = oppgaver[0].key()
-        nokkel.getEventId() shouldBeEqualTo id
-        nokkel.getFodselsnummer() shouldBeEqualTo fnr
-        nokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        nokkel.get("eventId") shouldBeEqualTo id
+        nokkel.get("fodselsnummer") shouldBeEqualTo fnr
+        nokkel.get("grupperingsId") shouldBeEqualTo sykmeldingId
 
         val oppgave = oppgaver[0].value()
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getEksternVarsling().`should be true`()
-        oppgave.getPrefererteKanaler() shouldBeEqualTo listOf(PreferertKanal.SMS.name)
+        System.currentTimeMillis() - (oppgave.get("tidspunkt") as Long) shouldBeLessThan 5000
+        oppgave.get("sikkerhetsnivaa") shouldBeEqualTo 4
+        oppgave.get("tekst") shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.get("link") shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        (oppgave.get("eksternVarsling") as Boolean).`should be true`()
+        oppgave.get("prefererteKanaler") shouldBeEqualTo listOf(PreferertKanal.SMS.name)
 
         val brukernotifikasjonDb = brukernotifikasjonRepository.findByIdOrNull(id)!!
         brukernotifikasjonDb.grupperingsid shouldBeEqualTo sykmeldingId
@@ -186,25 +185,24 @@ class IntegrationTest : AbstractContainerBaseTest() {
         dones.shouldHaveSize(1)
 
         val oppgaveNokkel = oppgaver.first().key()
-        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        oppgaveNokkel.get("eventId") shouldBeEqualTo id
+        oppgaveNokkel.get("fodselsnummer") shouldBeEqualTo fnr
+        oppgaveNokkel.get("grupperingsId") shouldBeEqualTo sykmeldingId
 
         val oppgave = oppgaver.first().value()
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
 
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
+        System.currentTimeMillis() - (oppgave.get("tidspunkt") as Long) shouldBeLessThan 5000
+        oppgave.get("sikkerhetsnivaa") shouldBeEqualTo 4
+        oppgave.get("tekst") shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.get("link") shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
 
-        doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
+        System.currentTimeMillis() - (done.get("tidspunkt") as Long) shouldBeLessThan 5000
+        doneNokkel.get("eventId") shouldBeEqualTo id
+        doneNokkel.get("fodselsnummer") shouldBeEqualTo fnr
+        doneNokkel.get("grupperingsId") shouldBeEqualTo sykmeldingId
     }
 
     @Test
@@ -267,22 +265,22 @@ class IntegrationTest : AbstractContainerBaseTest() {
         val oppgaveNokkel = oppgaver.first().key()
         val oppgave = oppgaver.first().value()
 
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
+        oppgaveNokkel.get("eventId") shouldBeEqualTo id
+        oppgaveNokkel.get("fodselsnummer") shouldBeEqualTo fnr
+        oppgaveNokkel.get("grupperingsId") shouldBeEqualTo sykmeldingId
 
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
+        System.currentTimeMillis() - (oppgave.get("tidspunkt") as Long) shouldBeLessThan 5000
+        oppgave.get("sikkerhetsnivaa") shouldBeEqualTo 4
+        oppgave.get("tekst") shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
+        oppgave.get("link") shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value()
 
-        doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
+        System.currentTimeMillis() - (done.get("tidspunkt") as Long) shouldBeLessThan 5000
+        doneNokkel.get("eventId") shouldBeEqualTo id
+        doneNokkel.get("fodselsnummer") shouldBeEqualTo fnr
+        doneNokkel.get("grupperingsId") shouldBeEqualTo sykmeldingId
     }
 
     @Test
