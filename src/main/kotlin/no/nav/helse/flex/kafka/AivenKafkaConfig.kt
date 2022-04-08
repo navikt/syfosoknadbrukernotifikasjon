@@ -1,5 +1,6 @@
 package no.nav.helse.flex.kafka
 
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -51,13 +52,16 @@ class AivenKafkaConfig(
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to false,
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1"
+            ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
+            // Deserialiser til SpecificRecord for å unngå: GenericData$Record cannot be cast to
+            // class no.nav.brukernotifikasjon.schemas.input.NokkelInput.
+            KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG to true
         ) + commonConfig()
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
 
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.consumerFactory = consumerFactory
-        factory.setErrorHandler(kafkaErrorHandler)
+        factory.setCommonErrorHandler(kafkaErrorHandler)
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory
     }
