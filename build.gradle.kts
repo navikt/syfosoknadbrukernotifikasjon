@@ -3,8 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.5.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.6.10"
-    kotlin("plugin.spring") version "1.6.10"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    kotlin("jvm") version "1.6.20"
+    kotlin("plugin.spring") version "1.6.20"
 }
 
 group = "no.nav.helse.flex"
@@ -16,12 +17,7 @@ buildscript {
     repositories {
         maven("https://plugins.gradle.org/m2/")
     }
-    dependencies {
-        classpath("org.jlleitschuh.gradle:ktlint-gradle:10.2.1")
-    }
 }
-
-apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
 val githubUser: String by project
 val githubPassword: String by project
@@ -78,11 +74,10 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "17"
-        if (System.getenv("CI") == "true") {
-            kotlinOptions.allWarningsAsErrors = true
-        }
+        kotlinOptions.allWarningsAsErrors = true
     }
 }
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
