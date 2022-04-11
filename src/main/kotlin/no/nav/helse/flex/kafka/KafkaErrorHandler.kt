@@ -15,7 +15,7 @@ class KafkaErrorHandler : DefaultErrorHandler(
     }
 ) {
 
-    val log = logger()
+    private val log = logger()
 
     override fun handleRemaining(
         thrownException: java.lang.Exception,
