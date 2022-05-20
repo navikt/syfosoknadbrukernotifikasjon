@@ -33,7 +33,7 @@ repositories {
     }
 }
 
-val testContainersVersion = "1.17.1"
+val testContainersVersion = "1.17.2"
 val logstashLogbackEncoderVersion = "7.1.1"
 val kluentVersion = "1.68"
 val brukernotifikasjonAvroVersion = "2.5.1"
