@@ -30,8 +30,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
     private lateinit var brukernotifikasjonOpprettelse: BrukernotifikasjonOpprettelse
 
     val fnr = "13068700000"
-    val systembruker = "brukernavnet"
-    val omToDager = OffsetDateTime.now().plusDays(2).toInstant()
+    val omFireDager = OffsetDateTime.now().plusDays(4).toInstant()
 
     @Test
     fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut med eksternt varsel`() {
@@ -67,14 +66,14 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omToDager
+                    omFireDager
                 )
             tilUtsendelse.size == 1
         }
         brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now())
             .shouldBeEmpty()
 
-        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
 
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
         doneKafkaConsumer.ventPåRecords(antall = 0)
@@ -151,13 +150,13 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omToDager
+                    omFireDager
                 )
             tilUtsendelse.size == 1
         }
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
 
-        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
@@ -231,11 +230,11 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omToDager
+                    omFireDager
                 )
             tilUtsendelse.size == 1
         }
-        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omToDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
         val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
@@ -309,7 +308,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omToDager
+                    omFireDager
                 )
             tilUtsendelse.size == 1
         }
@@ -328,7 +327,7 @@ class IntegrationTest : AbstractContainerBaseTest() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omToDager
+                    omFireDager
                 )
             tilUtsendelse.isEmpty()
         }

@@ -35,7 +35,7 @@ class BrukernotifikasjonPlanlegger(
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
 
-                val utsendelsestidspunkt = finnUtsendelsestidspunktFraNåværendeTidspunkt()
+                val utsendelsestidspunkt = finnUtsendelsestidspunkt()
 
                 brukernotifikasjonRepository.insert(
                     soknadsid = sykepengesoknad.id,
@@ -81,16 +81,24 @@ class BrukernotifikasjonPlanlegger(
             }
         }
     }
+}
 
-    private fun finnUtsendelsestidspunktFraNåværendeTidspunkt(): ZonedDateTime {
+internal fun finnUtsendelsestidspunkt(now: ZonedDateTime = ZonedDateTime.now(osloZone)): ZonedDateTime {
+    var utsendelsestidspunkt = now.withHour(timeMellom9og15()).withMinute(minuttMellom0og59())
 
-        val påDagtid = LocalTime.of(timeMellom9og15(), minuttMellom0og59())
-        return if (ZonedDateTime.now(osloZone).hour >= 9) {
-            ZonedDateTime.of(LocalDate.now().plusDays(1), påDagtid, osloZone)
-        } else {
-            ZonedDateTime.of(LocalDate.now(), påDagtid, osloZone)
-        }
+    if (now.hour >= 9) {
+        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(1)
     }
+
+    if (utsendelsestidspunkt.dayOfWeek == DayOfWeek.SATURDAY) {
+        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(2)
+    }
+
+    if (utsendelsestidspunkt.dayOfWeek == DayOfWeek.SUNDAY) {
+        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(1)
+    }
+
+    return utsendelsestidspunkt
 }
 
 private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
