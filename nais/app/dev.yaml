@@ -1,3 +1,4 @@
+db_tier: db-f1-micro
 minReplicas: '1'
 maxReplicas: '1'
 app: syfosoknadbrukernotifikasjon

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: {{team}}
 spec:
-  image: {{ image }}
+  image: {{image}}
   strategy:
     type: Recreate
   replicas:
@@ -38,6 +38,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_11
+        db_tier: {{db_tier}}
         diskAutoresize: true
         databases:
           - name: syfosoknadbrukernotifikasjon-db
