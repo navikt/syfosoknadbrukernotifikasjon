@@ -1,3 +1,4 @@
+db_tier: db-custom-1-3840
 minReplicas: '1'
 maxReplicas: '1'
 app: syfosoknadbrukernotifikasjon
