@@ -38,7 +38,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_11
-        db_tier: {{db_tier}}
+        tier: {{db_tier}}
         diskAutoresize: true
         databases:
           - name: syfosoknadbrukernotifikasjon-db
