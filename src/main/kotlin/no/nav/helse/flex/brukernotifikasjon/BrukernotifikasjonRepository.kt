@@ -21,4 +21,5 @@ interface BrukernotifikasjonRepository : CrudRepository<Brukernotifikasjon, Stri
     fun insert(soknadsid: String, grupperingsid: String, fnr: String, utsendelsestidspunkt: Instant?, soknadstype: Soknadstype, eksterntVarsel: Boolean)
 
     fun findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now: Instant): List<Brukernotifikasjon>
+    fun findByFnr(fnr: String): List<Brukernotifikasjon>
 }

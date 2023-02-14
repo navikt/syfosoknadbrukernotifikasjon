@@ -1,11 +1,9 @@
 db_tier: db-custom-1-3840
 minReplicas: '1'
 maxReplicas: '1'
-app: syfosoknadbrukernotifikasjon
-namespace: flex
-team: flex
 kafkaPool: nav-prod
 externalHosts:
   - kafka-schema-registry.nais.adeo.no
 env:
   SYKEPENGESOKNAD_FRONTEND_URL: https://www.nav.no/syk/sykepengesoknad/soknader/
+  SPRING_PROFILES_ACTIVE: default
