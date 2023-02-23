@@ -128,7 +128,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     fun `NY og SENDT søknad mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
-
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
         val enkelSoknad = EnkelSykepengesoknad(
@@ -208,7 +207,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     fun `NY og SENDT reisetilskudd mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
-
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
         val enkelSoknad = EnkelSykepengesoknad(
@@ -286,7 +284,6 @@ class IntegrationTest : AbstractContainerBaseTest() {
 
     @Test
     fun `Ustendendelse avbrytes hvis SENDT melding kommer før vi sender brukernotifikasjonen`() {
-
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
         val enkelSoknad = EnkelSykepengesoknad(

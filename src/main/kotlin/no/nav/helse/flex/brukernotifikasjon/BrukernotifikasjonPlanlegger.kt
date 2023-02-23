@@ -18,13 +18,12 @@ import java.time.*
 @Component
 class BrukernotifikasjonPlanlegger(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
+    private val brukernotifikasjonRepository: BrukernotifikasjonRepository
 ) {
 
     val log = logger()
 
     fun planleggBrukernotfikasjon(sykepengesoknadSomString: String) {
-
         val sykepengesoknad = sykepengesoknadSomString.tilEnkelSykepengesoknad()
 
         val fnr = sykepengesoknad.fnr
@@ -34,7 +33,6 @@ class BrukernotifikasjonPlanlegger(
         if (sykepengesoknad.skalOppretteOppgave()) {
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
-
                 val utsendelsestidspunkt = finnUtsendelsestidspunkt()
 
                 brukernotifikasjonRepository.insert(

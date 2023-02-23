@@ -34,7 +34,8 @@ class LeaderElection(
             .toUriString()
         val result = plainTextUtf8RestTemplate
             .exchange(
-                uriString, HttpMethod.GET,
+                uriString,
+                HttpMethod.GET,
                 null,
                 String::class.java
             )

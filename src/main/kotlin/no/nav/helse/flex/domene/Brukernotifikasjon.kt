@@ -12,5 +12,5 @@ data class Brukernotifikasjon(
     val eksterntVarsel: Boolean,
     val oppgaveSendt: Instant?,
     val doneSendt: Instant?,
-    val utsendelsestidspunkt: Instant?,
+    val utsendelsestidspunkt: Instant?
 )

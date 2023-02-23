@@ -46,7 +46,7 @@ class TestKafkaConfig(
             ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to "true",
             ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION to "1",
             ProducerConfig.MAX_BLOCK_MS_CONFIG to "15000",
-            ProducerConfig.RETRIES_CONFIG to "100000",
+            ProducerConfig.RETRIES_CONFIG to "100000"
         )
     }
 

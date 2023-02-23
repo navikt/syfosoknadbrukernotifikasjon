@@ -19,7 +19,7 @@ import java.time.ZoneOffset
 class BrukernotifikasjonOpprettelse(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
     @Value("\${frontend-url}") val sykepengesoknadFrontend: String,
-    private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
+    private val brukernotifikasjonRepository: BrukernotifikasjonRepository
 ) {
 
     val log = logger()

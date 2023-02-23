@@ -10,7 +10,7 @@ const val SYKEPENGESOKNAD_TOPIC = "flex." + "sykepengesoknad"
 
 @Component
 class AivenSykepengesoknadListener(
-    private val brukernotifikasjonPlanlegger: BrukernotifikasjonPlanlegger,
+    private val brukernotifikasjonPlanlegger: BrukernotifikasjonPlanlegger
 ) {
 
     @KafkaListener(
@@ -18,7 +18,6 @@ class AivenSykepengesoknadListener(
         containerFactory = "aivenKafkaListenerContainerFactory"
     )
     fun listen(cr: ConsumerRecord<String, String>, acknowledgment: Acknowledgment) {
-
         brukernotifikasjonPlanlegger.planleggBrukernotfikasjon(cr.value())
         acknowledgment.acknowledge()
     }

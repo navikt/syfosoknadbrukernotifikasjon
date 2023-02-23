@@ -14,7 +14,7 @@ import java.time.ZoneOffset
 @Profile("testdatareset")
 class NullstillBrukernotifikasjon(
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
 ) {
     private val log = logger()
 
