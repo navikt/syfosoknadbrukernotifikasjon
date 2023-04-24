@@ -1,4 +1,6 @@
 db_tier: db-f1-micro
+cpu: 100m
+memory: 300Mi
 minReplicas: '1'
 maxReplicas: '1'
 kafkaPool: nav-dev
