@@ -53,6 +53,7 @@ class AivenKafkaConfig(
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
+            ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
             // Deserialiser til SpecificRecord for å unngå: GenericData$Record cannot be cast to
             // class no.nav.brukernotifikasjon.schemas.input.NokkelInput.
             KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG to true
