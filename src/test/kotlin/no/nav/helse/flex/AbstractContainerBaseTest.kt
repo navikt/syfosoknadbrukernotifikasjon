@@ -31,7 +31,7 @@ abstract class AbstractContainerBaseTest {
                 System.setProperty("spring.datasource.password", it.password)
             }
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")).also {
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1")).also {
                 it.start()
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
