@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import java.time.DayOfWeek
 import java.time.ZonedDateTime
 
-internal class BrukernotifikasjonPlanleggerTest {
+class BrukernotifikasjonPlanleggerTest {
 
     @Test
     fun `Mandag kl 04 sendes Mandag`() {
