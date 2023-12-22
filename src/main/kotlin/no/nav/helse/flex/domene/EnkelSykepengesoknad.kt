@@ -8,7 +8,7 @@ data class EnkelSykepengesoknad(
     val status: Soknadsstatus,
     val type: Soknadstype,
     val fnr: String,
-    val sykmeldingId: String?
+    val sykmeldingId: String?,
 )
 
 enum class Soknadsstatus {
@@ -18,7 +18,7 @@ enum class Soknadsstatus {
     KORRIGERT,
     AVBRUTT,
     SLETTET,
-    UTGAATT
+    UTGAATT,
 }
 
 enum class Soknadstype {
@@ -29,7 +29,7 @@ enum class Soknadstype {
     ARBEIDSLEDIG,
     BEHANDLINGSDAGER,
     REISETILSKUDD,
-    GRADERT_REISETILSKUDD
+    GRADERT_REISETILSKUDD,
 }
 
 fun String.tilEnkelSykepengesoknad(): EnkelSykepengesoknad = objectMapper.readValue(this)

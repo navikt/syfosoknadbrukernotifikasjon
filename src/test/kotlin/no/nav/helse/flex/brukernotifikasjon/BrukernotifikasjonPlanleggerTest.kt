@@ -7,7 +7,6 @@ import java.time.DayOfWeek
 import java.time.ZonedDateTime
 
 class BrukernotifikasjonPlanleggerTest {
-
     @Test
     fun `Mandag kl 04 sendes Mandag`() {
         val mandagKl4 = ZonedDateTime.of(2022, 6, 6, 4, 12, 0, 0, osloZone)

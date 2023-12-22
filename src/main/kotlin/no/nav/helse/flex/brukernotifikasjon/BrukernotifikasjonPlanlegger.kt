@@ -18,9 +18,8 @@ import java.time.*
 @Component
 class BrukernotifikasjonPlanlegger(
     private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
-    private val brukernotifikasjonRepository: BrukernotifikasjonRepository
+    private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
-
     val log = logger()
 
     fun planleggBrukernotfikasjon(sykepengesoknadSomString: String) {
@@ -41,9 +40,12 @@ class BrukernotifikasjonPlanlegger(
                     fnr = fnr,
                     utsendelsestidspunkt = utsendelsestidspunkt.toInstant(),
                     eksterntVarsel = true,
-                    soknadstype = sykepengesoknad.type
+                    soknadstype = sykepengesoknad.type,
                 )
-                log.info("Lagrer ditt nav oppgave med id ${sykepengesoknad.id}, utsendelsestidspunkt $utsendelsestidspunkt, eksternt varsel: true")
+                log.info(
+                    "Lagrer ditt nav oppgave med id ${sykepengesoknad.id}, utsendelsestidspunkt $utsendelsestidspunkt, " +
+                        "eksternt varsel: true",
+                )
             } else {
                 log.info("Har allerede prossesert søknad med id  ${sykepengesoknad.id}")
             }
@@ -52,22 +54,27 @@ class BrukernotifikasjonPlanlegger(
             if (brukernotfikasjon != null) {
                 when {
                     brukernotfikasjon.utsendelsestidspunkt != null -> {
-                        log.info("Avbryter utsendelse av søknad med id ${sykepengesoknad.id} og utsendelsestidspunkt ${brukernotfikasjon.utsendelsestidspunkt}")
+                        log.info(
+                            "Avbryter utsendelse av søknad med id ${sykepengesoknad.id} og utsendelsestidspunkt " +
+                                "${brukernotfikasjon.utsendelsestidspunkt}",
+                        )
                         brukernotifikasjonRepository.save(brukernotfikasjon.copy(utsendelsestidspunkt = null))
                     }
                     brukernotfikasjon.doneSendt == null -> {
                         log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                        val nokkel = NokkelInputBuilder()
-                            .withEventId(sykepengesoknad.id)
-                            .withGrupperingsId(grupperingsid)
-                            .withFodselsnummer(fnr)
-                            .withNamespace("flex")
-                            .withAppnavn("syfosoknadbrukernotifikasjon")
-                            .build()
+                        val nokkel =
+                            NokkelInputBuilder()
+                                .withEventId(sykepengesoknad.id)
+                                .withGrupperingsId(grupperingsid)
+                                .withFodselsnummer(fnr)
+                                .withNamespace("flex")
+                                .withAppnavn("syfosoknadbrukernotifikasjon")
+                                .build()
 
-                        val done = DoneInputBuilder()
-                            .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-                            .build()
+                        val done =
+                            DoneInputBuilder()
+                                .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
+                                .build()
 
                         brukernotifikasjonKafkaProdusent.sendDonemelding(nokkel, done)
                         brukernotifikasjonRepository.save(brukernotfikasjon.copy(doneSendt = Instant.now()))

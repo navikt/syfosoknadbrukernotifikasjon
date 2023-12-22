@@ -14,9 +14,8 @@ import java.net.InetAddress
 @Component
 class LeaderElection(
     private val plainTextUtf8RestTemplate: RestTemplate,
-    @Value("\${elector.path}") private val electorPath: String
+    @Value("\${elector.path}") private val electorPath: String,
 ) {
-
     val log = logger()
 
     fun isLeader(): Boolean {
@@ -30,15 +29,17 @@ class LeaderElection(
     private fun kallElector(): Boolean {
         val hostname: String = InetAddress.getLocalHost().hostName
 
-        val uriString = UriComponentsBuilder.fromHttpUrl(getHttpPath(electorPath))
-            .toUriString()
-        val result = plainTextUtf8RestTemplate
-            .exchange(
-                uriString,
-                HttpMethod.GET,
-                null,
-                String::class.java
-            )
+        val uriString =
+            UriComponentsBuilder.fromHttpUrl(getHttpPath(electorPath))
+                .toUriString()
+        val result =
+            plainTextUtf8RestTemplate
+                .exchange(
+                    uriString,
+                    HttpMethod.GET,
+                    null,
+                    String::class.java,
+                )
         if (result.statusCode != HttpStatus.OK) {
             val message = "Kall mot elector feiler med HTTP-" + result.statusCode
             log.error(message)
@@ -60,5 +61,6 @@ class LeaderElection(
             true -> url
             else -> "http://$url"
         }
+
     private data class Leader(val name: String)
 }

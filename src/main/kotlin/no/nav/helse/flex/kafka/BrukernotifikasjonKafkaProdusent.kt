@@ -11,11 +11,14 @@ import org.springframework.stereotype.Component
 @Component
 class BrukernotifikasjonKafkaProdusent(
     private val kafkaproducerOppgave: Producer<NokkelInput, OppgaveInput>,
-    private val kafkaproducerDone: Producer<NokkelInput, DoneInput>
+    private val kafkaproducerDone: Producer<NokkelInput, DoneInput>,
 ) {
     val log = logger()
 
-    fun opprettBrukernotifikasjonOppgave(nokkel: NokkelInput, oppgave: OppgaveInput) {
+    fun opprettBrukernotifikasjonOppgave(
+        nokkel: NokkelInput,
+        oppgave: OppgaveInput,
+    ) {
         try {
             kafkaproducerOppgave.send(ProducerRecord(OPPGAVE_TOPIC, nokkel, oppgave)).get()
         } catch (e: Exception) {
@@ -24,7 +27,10 @@ class BrukernotifikasjonKafkaProdusent(
         }
     }
 
-    fun sendDonemelding(nokkel: NokkelInput, done: DoneInput) {
+    fun sendDonemelding(
+        nokkel: NokkelInput,
+        done: DoneInput,
+    ) {
         try {
             kafkaproducerDone.send(ProducerRecord(DONE_TOPIC, nokkel, done)).get()
         } catch (e: Exception) {
