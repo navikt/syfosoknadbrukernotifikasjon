@@ -10,16 +10,23 @@ import java.time.Instant
 
 @Repository
 interface BrukernotifikasjonRepository : CrudRepository<Brukernotifikasjon, String> {
-
     @Modifying
     @Query(
         """
             INSERT INTO brukernotifikasjon(SOKNADSID, GRUPPERINGSID, FNR, UTSENDELSESTIDSPUNKT, SOKNADSTYPE, EKSTERNT_VARSEL)
             VALUES (:soknadsid, :grupperingsid, :fnr, :utsendelsestidspunkt, :soknadstype, :eksterntVarsel )
-            """
+            """,
     )
-    fun insert(soknadsid: String, grupperingsid: String, fnr: String, utsendelsestidspunkt: Instant?, soknadstype: Soknadstype, eksterntVarsel: Boolean)
+    fun insert(
+        soknadsid: String,
+        grupperingsid: String,
+        fnr: String,
+        utsendelsestidspunkt: Instant?,
+        soknadstype: Soknadstype,
+        eksterntVarsel: Boolean,
+    )
 
     fun findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(now: Instant): List<Brukernotifikasjon>
+
     fun findByFnr(fnr: String): List<Brukernotifikasjon>
 }

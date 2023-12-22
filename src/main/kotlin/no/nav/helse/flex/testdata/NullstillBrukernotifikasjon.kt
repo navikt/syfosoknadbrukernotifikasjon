@@ -14,7 +14,7 @@ import java.time.ZoneOffset
 @Profile("testdatareset")
 class NullstillBrukernotifikasjon(
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent
+    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
 ) {
     private val log = logger()
 
@@ -27,17 +27,19 @@ class NullstillBrukernotifikasjon(
                 if (it.oppgaveSendt != null && it.doneSendt == null) {
                     log.info("Sender done melding med id ${it.soknadsid} og grupperingsid ${it.grupperingsid}")
 
-                    val nokkel = NokkelInputBuilder()
-                        .withEventId(it.soknadsid)
-                        .withGrupperingsId(it.grupperingsid)
-                        .withFodselsnummer(fnr)
-                        .withNamespace("flex")
-                        .withAppnavn("syfosoknadbrukernotifikasjon")
-                        .build()
+                    val nokkel =
+                        NokkelInputBuilder()
+                            .withEventId(it.soknadsid)
+                            .withGrupperingsId(it.grupperingsid)
+                            .withFodselsnummer(fnr)
+                            .withNamespace("flex")
+                            .withAppnavn("syfosoknadbrukernotifikasjon")
+                            .build()
 
-                    val done = DoneInputBuilder()
-                        .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-                        .build()
+                    val done =
+                        DoneInputBuilder()
+                            .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
+                            .build()
 
                     brukernotifikasjonKafkaProdusent.sendDonemelding(nokkel, done)
                 }

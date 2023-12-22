@@ -20,9 +20,8 @@ class ProducerKafkaConfig(
     private val aivenKafkaConfig: AivenKafkaConfig,
     @Value("\${KAFKA_SCHEMA_REGISTRY}") private val kafkaSchemaRegistryUrl: String,
     @Value("\${KAFKA_SCHEMA_REGISTRY_USER}") private val kafkaSchemaUsername: String,
-    @Value("\${KAFKA_SCHEMA_REGISTRY_PASSWORD}") private val kafkaSchemaPassword: String
+    @Value("\${KAFKA_SCHEMA_REGISTRY_PASSWORD}") private val kafkaSchemaPassword: String,
 ) {
-
     private fun producerConfig(): Map<String, Any> {
         return mapOf(
             ProducerConfig.ACKS_CONFIG to "all",
@@ -35,7 +34,7 @@ class ProducerKafkaConfig(
             AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaSchemaRegistryUrl,
             KafkaAvroSerializerConfig.USER_INFO_CONFIG to "$kafkaSchemaUsername:$kafkaSchemaPassword",
             KafkaAvroSerializerConfig.BASIC_AUTH_CREDENTIALS_SOURCE to "USER_INFO",
-            SaslConfigs.SASL_MECHANISM to "PLAIN"
+            SaslConfigs.SASL_MECHANISM to "PLAIN",
         ) + aivenKafkaConfig.commonConfig()
     }
 

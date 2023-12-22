@@ -19,7 +19,6 @@ import java.time.OffsetDateTime
 import java.util.*
 
 class IntegrationTest : AbstractContainerBaseTest() {
-
     @Autowired
     private lateinit var aivenKafkaProducer: KafkaProducer<String, String>
 
@@ -36,21 +35,22 @@ class IntegrationTest : AbstractContainerBaseTest() {
     fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut med eksternt varsel`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.NY,
-            type = Soknadstype.ARBEIDSTAKERE,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.ARBEIDSTAKERE,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
 
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
 
         // Håndterer duplikat
@@ -59,14 +59,14 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
 
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager
+                    omFireDager,
                 )
             tilUtsendelse.size == 1
         }
@@ -105,21 +105,22 @@ class IntegrationTest : AbstractContainerBaseTest() {
     fun `SENDT søknad uten innslag i db får ikke done oppgave`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.SENDT,
-            type = Soknadstype.ARBEIDSTAKERE,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.SENDT,
+                type = Soknadstype.ARBEIDSTAKERE,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
 
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
 
         oppgaveKafkaConsumer.ventPåRecords(antall = 0)
@@ -130,26 +131,27 @@ class IntegrationTest : AbstractContainerBaseTest() {
     fun `NY og SENDT søknad mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.NY,
-            type = Soknadstype.ARBEIDSTAKERE,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.ARBEIDSTAKERE,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
 
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager
+                    omFireDager,
                 )
             tilUtsendelse.size == 1
         }
@@ -165,8 +167,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                sendtSoknad.serialisertTilString()
-            )
+                sendtSoknad.serialisertTilString(),
+            ),
         )
         // Håndterer duplikat av sendt
         aivenKafkaProducer.send(
@@ -174,8 +176,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                sendtSoknad.serialisertTilString()
-            )
+                sendtSoknad.serialisertTilString(),
+            ),
         )
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
@@ -209,26 +211,27 @@ class IntegrationTest : AbstractContainerBaseTest() {
     fun `NY og SENDT reisetilskudd mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.NY,
-            type = Soknadstype.REISETILSKUDD,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.REISETILSKUDD,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
 
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager
+                    omFireDager,
                 )
             tilUtsendelse.size == 1
         }
@@ -243,8 +246,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                sendtSoknad.serialisertTilString()
-            )
+                sendtSoknad.serialisertTilString(),
+            ),
         )
         // Håndterer duplikat av sendt
         aivenKafkaProducer.send(
@@ -252,8 +255,8 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                sendtSoknad.serialisertTilString()
-            )
+                sendtSoknad.serialisertTilString(),
+            ),
         )
 
         val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
@@ -286,26 +289,27 @@ class IntegrationTest : AbstractContainerBaseTest() {
     fun `Ustendendelse avbrytes hvis SENDT melding kommer før vi sender brukernotifikasjonen`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad = EnkelSykepengesoknad(
-            id = id,
-            status = Soknadsstatus.NY,
-            type = Soknadstype.ARBEIDSTAKERE,
-            fnr = fnr,
-            sykmeldingId = sykmeldingId
-        )
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.ARBEIDSTAKERE,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
 
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString()
-            )
+                enkelSoknad.serialisertTilString(),
+            ),
         )
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager
+                    omFireDager,
                 )
             tilUtsendelse.size == 1
         }
@@ -317,14 +321,14 @@ class IntegrationTest : AbstractContainerBaseTest() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                sendtSoknad.serialisertTilString()
-            )
+                sendtSoknad.serialisertTilString(),
+            ),
         )
 
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager
+                    omFireDager,
                 )
             tilUtsendelse.isEmpty()
         }
