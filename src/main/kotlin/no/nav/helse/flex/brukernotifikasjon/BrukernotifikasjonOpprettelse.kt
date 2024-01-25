@@ -10,7 +10,7 @@ import no.nav.helse.flex.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.net.URL
+import java.net.URI
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -33,12 +33,11 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
-                @Suppress("DEPRECATION")
                 val oppgave =
                     OppgaveInputBuilder()
                         .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
                         .withTekst(brukernotifikasjon.opprettBrukernotifikasjonTekst())
-                        .withLink(URL("${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}"))
+                        .withLink(URI("${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}").toURL())
                         .withSikkerhetsnivaa(4)
                         .withEksternVarsling(brukernotifikasjon.eksterntVarsel)
                         .also { builder ->
