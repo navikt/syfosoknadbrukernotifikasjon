@@ -33,6 +33,7 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
+                @Suppress("DEPRECATION")
                 val oppgave =
                     OppgaveInputBuilder()
                         .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))

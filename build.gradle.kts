@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -11,7 +12,7 @@ plugins {
 group = "no.nav.helse.flex"
 version = "1.0.0"
 description = "syfosoknadbrukernotifikasjon"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_21
 
 buildscript {
     repositories {
@@ -70,11 +71,12 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+        freeCompilerArgs.add("-Xjsr305=strict")
+
         if (System.getenv("CI") == "true") {
-            kotlinOptions.allWarningsAsErrors = true
+            allWarningsAsErrors.set(true)
         }
     }
 }
