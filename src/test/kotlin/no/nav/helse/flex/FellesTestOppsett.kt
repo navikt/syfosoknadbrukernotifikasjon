@@ -20,7 +20,7 @@ private class PostgreSQLContainer11 : PostgreSQLContainer<PostgreSQLContainer11>
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
-abstract class AbstractContainerBaseTest {
+abstract class FellesTestOppsett {
     companion object {
         init {
             PostgreSQLContainer11().also {

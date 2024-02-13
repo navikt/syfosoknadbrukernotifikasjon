@@ -18,7 +18,7 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.util.*
 
-class IntegrationTest : AbstractContainerBaseTest() {
+class IntegrationTest : FellesTestOppsett() {
     @Autowired
     private lateinit var aivenKafkaProducer: KafkaProducer<String, String>
 
