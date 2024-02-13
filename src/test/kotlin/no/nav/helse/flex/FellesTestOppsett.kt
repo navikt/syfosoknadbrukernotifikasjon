@@ -16,21 +16,21 @@ import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
-private class PostgreSQLContainer11 : PostgreSQLContainer<PostgreSQLContainer11>("postgres:11.4-alpine")
+private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>("postgres:14-alpine")
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 abstract class FellesTestOppsett {
     companion object {
         init {
-            PostgreSQLContainer11().also {
+            PostgreSQLContainer14().also {
                 it.start()
                 System.setProperty("spring.datasource.url", it.jdbcUrl)
                 System.setProperty("spring.datasource.username", it.username)
                 System.setProperty("spring.datasource.password", it.password)
             }
 
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.1")).also {
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.3")).also {
                 it.start()
                 System.setProperty("KAFKA_BROKERS", it.bootstrapServers)
             }
