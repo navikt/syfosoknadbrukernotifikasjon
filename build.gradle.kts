@@ -36,7 +36,7 @@ val testContainersVersion = "1.19.4"
 val logstashLogbackEncoderVersion = "7.4"
 val kluentVersion = "1.73"
 val brukernotifikasjonAvroVersion = "2.5.2"
-val confluentVersion = "7.5.3"
+val confluentVersion = "7.6.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
