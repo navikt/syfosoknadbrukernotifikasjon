@@ -1,12 +1,15 @@
 package no.nav.helse.flex
 
-import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
+import no.nav.tms.varsel.action.EksternKanal
+import no.nav.tms.varsel.action.Sensitivitet
+import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -75,23 +78,25 @@ class IntegrationTest : FellesTestOppsett() {
 
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
 
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
+        val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
+        varslingConsumer.ventPåRecords(antall = 0)
 
         oppgaver.shouldHaveSize(1)
 
         val nokkel = oppgaver[0].key()
-        nokkel.getEventId() shouldBeEqualTo id
-        nokkel.getFodselsnummer() shouldBeEqualTo fnr
-        nokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        nokkel shouldBeEqualTo id
 
-        val oppgave = oppgaver[0].value()
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.getEksternVarsling().`should be true`()
-        oppgave.getPrefererteKanaler() shouldBeEqualTo listOf(PreferertKanal.SMS.name)
+        val oppgave = oppgaver[0].value().tilOpprettVarselInstance()
+        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
+        oppgave.ident shouldBeEqualTo fnr
+        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.eksternVarsling.shouldNotBeNull()
+        oppgave.eksternVarsling!!.prefererteKanaler shouldBeEqualTo listOf(EksternKanal.SMS)
+        oppgave.eksternVarsling!!.smsVarslingstekst.shouldBeNull()
+        oppgave.produsent!!.namespace shouldBeEqualTo "flex"
+        oppgave.produsent!!.cluster shouldBeEqualTo "test-gcp"
+        oppgave.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
 
         val brukernotifikasjonDb = brukernotifikasjonRepository.findByIdOrNull(id)!!
         brukernotifikasjonDb.grupperingsid shouldBeEqualTo sykmeldingId
@@ -123,8 +128,7 @@ class IntegrationTest : FellesTestOppsett() {
             ),
         )
 
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
-        doneKafkaConsumer.ventPåRecords(antall = 0)
+        varslingConsumer.ventPåRecords(antall = 0)
     }
 
     @Test
@@ -155,10 +159,10 @@ class IntegrationTest : FellesTestOppsett() {
                 )
             tilUtsendelse.size == 1
         }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        varslingConsumer.ventPåRecords(antall = 0)
 
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
         val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
@@ -180,31 +184,30 @@ class IntegrationTest : FellesTestOppsett() {
             ),
         )
 
-        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
+        val dones = varslingConsumer.ventPåRecords(antall = 1)
 
         oppgaver.shouldHaveSize(1)
         dones.shouldHaveSize(1)
 
         val oppgaveNokkel = oppgaver.first().key()
-        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
+        oppgaveNokkel shouldBeEqualTo id
 
-        val oppgave = oppgaver.first().value()
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
+        val oppgaveString = oppgaver.first().value()
+        val oppgave = oppgaveString.tilOpprettVarselInstance()
 
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
+        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
+        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.ident shouldBeEqualTo fnr
 
         val doneNokkel = dones.first().key()
-        val done = dones.first().value()
+        val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
+        doneNokkel shouldBeEqualTo id
+        done.varselId shouldBeEqualTo id
+        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
+        done.produsent!!.namespace shouldBeEqualTo "flex"
     }
 
     @Test
@@ -236,7 +239,7 @@ class IntegrationTest : FellesTestOppsett() {
             tilUtsendelse.size == 1
         }
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
-        val oppgaver = oppgaveKafkaConsumer.ventPåRecords(antall = 1)
+        val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
 
@@ -259,30 +262,30 @@ class IntegrationTest : FellesTestOppsett() {
             ),
         )
 
-        val dones = doneKafkaConsumer.ventPåRecords(antall = 1)
+        val dones = varslingConsumer.ventPåRecords(antall = 1)
 
         oppgaver.shouldHaveSize(1)
         dones.shouldHaveSize(1)
 
         val oppgaveNokkel = oppgaver.first().key()
-        val oppgave = oppgaver.first().value()
+        val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
 
-        oppgaveNokkel.getEventId() shouldBeEqualTo id
-        oppgaveNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        oppgaveNokkel.getFodselsnummer() shouldBeEqualTo fnr
+        oppgaveNokkel shouldBeEqualTo id
 
-        oppgave.getSikkerhetsnivaa() shouldBeEqualTo 4
-        oppgave.getTekst() shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
-        oppgave.getLink() shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        System.currentTimeMillis() - oppgave.getTidspunkt() shouldBeLessThan 5000
+        oppgave.varselId shouldBeEqualTo id
+        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
+        oppgave.ident shouldBeEqualTo fnr
+        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
 
         val doneNokkel = dones.first().key()
-        val done = dones.first().value()
+        val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel.getEventId() shouldBeEqualTo id
-        doneNokkel.getFodselsnummer() shouldBeEqualTo fnr
-        doneNokkel.getGrupperingsId() shouldBeEqualTo sykmeldingId
-        System.currentTimeMillis() - done.getTidspunkt() shouldBeLessThan 5000
+        doneNokkel shouldBeEqualTo id
+        done.varselId shouldBeEqualTo id
+        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
+        done.produsent!!.namespace shouldBeEqualTo "flex"
     }
 
     @Test
@@ -313,7 +316,7 @@ class IntegrationTest : FellesTestOppsett() {
                 )
             tilUtsendelse.size == 1
         }
-        oppgaveKafkaConsumer.ventPåRecords(antall = 0)
+        varslingConsumer.ventPåRecords(antall = 0)
 
         val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
         aivenKafkaProducer.send(
@@ -332,5 +335,13 @@ class IntegrationTest : FellesTestOppsett() {
                 )
             tilUtsendelse.isEmpty()
         }
+    }
+
+    fun String.tilOpprettVarselInstance(): VarselActionBuilder.OpprettVarselInstance {
+        return objectMapper.readValue(this)
+    }
+
+    fun String.tilInaktiverVarselInstance(): VarselActionBuilder.InaktiverVarselInstance {
+        return objectMapper.readValue(this)
     }
 }

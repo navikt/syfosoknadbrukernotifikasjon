@@ -1,12 +1,8 @@
 package no.nav.helse.flex
 
-import no.nav.brukernotifikasjon.schemas.input.DoneInput
-import no.nav.brukernotifikasjon.schemas.input.NokkelInput
-import no.nav.brukernotifikasjon.schemas.input.OppgaveInput
-import no.nav.helse.flex.kafka.DONE_TOPIC
-import no.nav.helse.flex.kafka.OPPGAVE_TOPIC
+import no.nav.helse.flex.kafka.nyttVarselTopic
 import org.amshove.kluent.shouldBeEmpty
-import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
@@ -23,6 +19,17 @@ private class PostgreSQLContainer14 : PostgreSQLContainer<PostgreSQLContainer14>
 abstract class FellesTestOppsett {
     companion object {
         init {
+            /*
+            NAIS_CLUSTER_NAME: test-gcp
+NAIS_NAMESPACE: flex
+NAIS_APP_NAME: syfosoknadbrukernotifikasjon
+
+             */
+            System.setProperty("SADASD", "it.jdbcUrl")
+            System.setProperty("NAIS_CLUSTER_NAME", "test-gcp")
+            System.setProperty("NAIS_NAMESPACE", "flex")
+            System.setProperty("NAIS_APP_NAME", "syfosoknadbrukernotifikasjon")
+
             PostgreSQLContainer14().also {
                 it.start()
                 System.setProperty("spring.datasource.url", it.jdbcUrl)
@@ -38,28 +45,18 @@ abstract class FellesTestOppsett {
     }
 
     @Autowired
-    lateinit var oppgaveKafkaConsumer: Consumer<NokkelInput, OppgaveInput>
-
-    @Autowired
-    lateinit var doneKafkaConsumer: Consumer<NokkelInput, DoneInput>
+    lateinit var varslingConsumer: KafkaConsumer<String, String>
 
     @AfterAll
     fun `Vi leser oppgave kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
-        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-    }
-
-    @AfterAll
-    fun `Vi leser done kafka topicet og feil hvis noe finnes og slik at subklassetestene leser alt`() {
-        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+        varslingConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 
     @BeforeAll
     fun `Vi leser oppgave og done kafka topicet og feiler om noe eksisterer`() {
-        oppgaveKafkaConsumer.subscribeHvisIkkeSubscribed(OPPGAVE_TOPIC)
-        doneKafkaConsumer.subscribeHvisIkkeSubscribed(DONE_TOPIC)
+        varslingConsumer.subscribeHvisIkkeSubscribed(nyttVarselTopic)
 
-        oppgaveKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
-        doneKafkaConsumer.hentProduserteRecords().shouldBeEmpty()
+        varslingConsumer.hentProduserteRecords().shouldBeEmpty()
     }
 
     fun Any.serialisertTilString(): String = objectMapper.writeValueAsString(this)

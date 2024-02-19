@@ -39,12 +39,6 @@ spec:
         diskAutoresize: true
         databases:
           - name: syfosoknadbrukernotifikasjon-db
-  accessPolicy:
-    outbound:
-      external:
-      {{#each externalHosts as |url|}}
-         - host: {{url}}
-      {{/each}}
   kafka:
     pool: {{kafkaPool}}
   leaderElection: true

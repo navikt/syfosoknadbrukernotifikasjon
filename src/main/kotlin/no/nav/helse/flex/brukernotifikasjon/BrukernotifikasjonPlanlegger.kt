@@ -1,23 +1,24 @@
 package no.nav.helse.flex.brukernotifikasjon
 
-import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
-import no.nav.helse.flex.kafka.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.util.minuttMellom0og59
 import no.nav.helse.flex.util.osloZone
 import no.nav.helse.flex.util.timeMellom9og15
+import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import java.time.*
 
 @Component
 class BrukernotifikasjonPlanlegger(
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    private val kafkaProducer: KafkaProducer<String, String>,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
     val log = logger()
@@ -60,25 +61,20 @@ class BrukernotifikasjonPlanlegger(
                         )
                         brukernotifikasjonRepository.save(brukernotfikasjon.copy(utsendelsestidspunkt = null))
                     }
+
                     brukernotfikasjon.doneSendt == null -> {
-                        log.info("Sender done melding med id ${sykepengesoknad.id} og grupperingsid $grupperingsid")
-                        val nokkel =
-                            NokkelInputBuilder()
-                                .withEventId(sykepengesoknad.id)
-                                .withGrupperingsId(grupperingsid)
-                                .withFodselsnummer(fnr)
-                                .withNamespace("flex")
-                                .withAppnavn("syfosoknadbrukernotifikasjon")
-                                .build()
+                        log.info("Sender done melding med id ${sykepengesoknad.id} ")
 
-                        val done =
-                            DoneInputBuilder()
-                                .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-                                .build()
+                        val inaktiverVarsel =
+                            VarselActionBuilder.inaktiver {
+                                varselId = sykepengesoknad.id
+                            }
 
-                        brukernotifikasjonKafkaProdusent.sendDonemelding(nokkel, done)
+                        kafkaProducer.send(ProducerRecord(nyttVarselTopic, sykepengesoknad.id, inaktiverVarsel)).get()
+
                         brukernotifikasjonRepository.save(brukernotfikasjon.copy(doneSendt = Instant.now()))
                     }
+
                     else -> {
                         log.info("Har allerede sendt brukernotifikasjon done melding for søknad med id  ${sykepengesoknad.id}")
                     }

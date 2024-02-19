@@ -1,23 +1,21 @@
 package no.nav.helse.flex.brukernotifikasjon
 
-import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder
-import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal
 import no.nav.helse.flex.domene.Brukernotifikasjon
 import no.nav.helse.flex.domene.Soknadstype
-import no.nav.helse.flex.kafka.BrukernotifikasjonKafkaProdusent
+import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
+import no.nav.tms.varsel.action.*
+import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.net.URI
 import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 @Service
 class BrukernotifikasjonOpprettelse(
-    private val brukernotifikasjonKafkaProdusent: BrukernotifikasjonKafkaProdusent,
+    private val kafkaProducer: KafkaProducer<String, String>,
     @Value("\${frontend-url}") val sykepengesoknadFrontend: String,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
@@ -33,37 +31,36 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
-                val oppgave =
-                    OppgaveInputBuilder()
-                        .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-                        .withTekst(brukernotifikasjon.opprettBrukernotifikasjonTekst())
-                        .withLink(URI("${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}").toURL())
-                        .withSikkerhetsnivaa(4)
-                        .withEksternVarsling(brukernotifikasjon.eksterntVarsel)
-                        .also { builder ->
+                val opprettVarsel =
+                    VarselActionBuilder.opprett {
+                        type = Varseltype.Oppgave
+                        varselId = brukernotifikasjon.soknadsid
+                        sensitivitet = Sensitivitet.High
+                        ident = brukernotifikasjon.fnr
+                        tekst =
+                            Tekst(
+                                spraakkode = "nb",
+                                tekst = brukernotifikasjon.opprettBrukernotifikasjonTekst(),
+                                default = true,
+                            )
+                        aktivFremTil = null
+                        link = "${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}"
+                        eksternVarsling =
                             if (brukernotifikasjon.eksterntVarsel) {
-                                builder.withPrefererteKanaler(PreferertKanal.SMS)
+                                EksternVarslingBestilling(
+                                    prefererteKanaler = listOf(EksternKanal.SMS),
+                                )
                             } else {
-                                builder.withPrefererteKanaler()
+                                null
                             }
-                        }
-                        .build()
-
-                val nokkel =
-                    NokkelInputBuilder()
-                        .withEventId(brukernotifikasjon.soknadsid)
-                        .withGrupperingsId(brukernotifikasjon.grupperingsid)
-                        .withFodselsnummer(brukernotifikasjon.fnr)
-                        .withNamespace("flex")
-                        .withAppnavn("syfosoknadbrukernotifikasjon")
-                        .build()
+                    }
 
                 log.info(
-                    "Sender dittnav oppgave med id ${brukernotifikasjon.soknadsid} og grupperingsid " +
-                        "${brukernotifikasjon.grupperingsid} og eksternt varsel ${oppgave.getEksternVarsling()}",
+                    "Sender dittnav varsel med id ${brukernotifikasjon.soknadsid}",
                 )
 
-                brukernotifikasjonKafkaProdusent.opprettBrukernotifikasjonOppgave(nokkel, oppgave)
+                kafkaProducer.send(ProducerRecord(nyttVarselTopic, brukernotifikasjon.soknadsid, opprettVarsel)).get()
+
                 brukernotifikasjonRepository.save(
                     brukernotifikasjon.copy(
                         oppgaveSendt = Instant.now(),
@@ -85,6 +82,7 @@ private fun Brukernotifikasjon.opprettBrukernotifikasjonTekst(): String =
         Soknadstype.ARBEIDSLEDIG,
         Soknadstype.BEHANDLINGSDAGER,
         -> "Du har en søknad om sykepenger du må fylle ut"
+
         Soknadstype.REISETILSKUDD -> "Du har en søknad om reisetilskudd du må fylle ut"
         Soknadstype.GRADERT_REISETILSKUDD -> "Du har en søknad om sykepenger med reisetilskudd du må fylle ut"
         else -> throw IllegalArgumentException(

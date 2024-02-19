@@ -4,8 +4,6 @@ memory: 512Mi
 minReplicas: '1'
 maxReplicas: '1'
 kafkaPool: nav-prod
-externalHosts:
-  - kafka-schema-registry.nais.adeo.no
 env:
   SYKEPENGESOKNAD_FRONTEND_URL: https://www.nav.no/syk/sykepengesoknad/soknader/
   SPRING_PROFILES_ACTIVE: default
