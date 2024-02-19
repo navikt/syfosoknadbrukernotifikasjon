@@ -1,11 +1,13 @@
 package no.nav.helse.flex.kafka
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
@@ -55,9 +57,6 @@ class AivenKafkaConfig(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "1",
                 ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "600000",
-                // Deserialiser til SpecificRecord for å unngå: GenericData$Record cannot be cast to
-                // class no.nav.brukernotifikasjon.schemas.input.NokkelInput.
-                KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG to true,
             ) + commonConfig()
         val consumerFactory = DefaultKafkaConsumerFactory<String, String>(config)
 
@@ -67,4 +66,19 @@ class AivenKafkaConfig(
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         return factory
     }
+
+    @Bean
+    fun kafkaProducer(): KafkaProducer<String, String> {
+        val configs =
+            mapOf(
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
+                ProducerConfig.ACKS_CONFIG to "all",
+                ProducerConfig.RETRIES_CONFIG to 10,
+                ProducerConfig.RETRY_BACKOFF_MS_CONFIG to 100,
+            ) + commonConfig()
+        return KafkaProducer<String, String>(configs)
+    }
 }
+
+val nyttVarselTopic = "min-side.aapen-brukervarsel-v1"
