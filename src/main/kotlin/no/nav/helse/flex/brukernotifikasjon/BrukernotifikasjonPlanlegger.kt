@@ -6,9 +6,6 @@ import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
 import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
-import no.nav.helse.flex.util.minuttMellom0og59
-import no.nav.helse.flex.util.osloZone
-import no.nav.helse.flex.util.timeMellom9og15
 import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -84,22 +81,8 @@ class BrukernotifikasjonPlanlegger(
     }
 }
 
-internal fun finnUtsendelsestidspunkt(now: ZonedDateTime = ZonedDateTime.now(osloZone)): ZonedDateTime {
-    var utsendelsestidspunkt = now.withHour(timeMellom9og15()).withMinute(minuttMellom0og59())
-
-    if (now.hour >= 9) {
-        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(1)
-    }
-
-    if (utsendelsestidspunkt.dayOfWeek == DayOfWeek.SATURDAY) {
-        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(2)
-    }
-
-    if (utsendelsestidspunkt.dayOfWeek == DayOfWeek.SUNDAY) {
-        utsendelsestidspunkt = utsendelsestidspunkt.plusDays(1)
-    }
-
-    return utsendelsestidspunkt
+internal fun finnUtsendelsestidspunkt(): ZonedDateTime {
+    return ZonedDateTime.now()
 }
 
 private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {

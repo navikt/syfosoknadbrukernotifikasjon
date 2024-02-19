@@ -73,7 +73,7 @@ class IntegrationTest : FellesTestOppsett() {
                 )
             tilUtsendelse.size == 1
         }
-        brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now())
+        brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now().minusMillis(5000))
             .shouldBeEmpty()
 
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)

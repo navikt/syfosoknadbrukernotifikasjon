@@ -14,8 +14,8 @@ class CronJob(
     val log = logger()
 
     @Scheduled(
-        initialDelay = 2,
-        fixedDelay = 10,
+        initialDelay = 1,
+        fixedDelay = 1,
         timeUnit = TimeUnit.MINUTES,
     )
     fun run() {
