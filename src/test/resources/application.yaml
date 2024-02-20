@@ -21,3 +21,7 @@ aiven-kafka:
 
 frontend-url: https://tjenester-q1.nav.no/sykepengesoknad/soknader/
 elector.path: dont_look_for_leader
+
+NAIS_CLUSTER_NAME: test-gcp
+NAIS_NAMESPACE: flex
+NAIS_APP_NAME: syfosoknadbrukernotifikasjon

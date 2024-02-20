@@ -69,9 +69,6 @@ kotlin {
 tasks {
     test {
         useJUnitPlatform()
-        environment("NAIS_CLUSTER_NAME", "test-gcp")
-        environment("NAIS_NAMESPACE", "flex")
-        environment("NAIS_APP_NAME", "syfosoknadbrukernotifikasjon")
         jvmArgs("-XX:+EnableDynamicAgentLoading")
         testLogging {
             events("PASSED", "FAILED", "SKIPPED")
