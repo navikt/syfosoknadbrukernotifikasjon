@@ -20,23 +20,17 @@ buildscript {
     }
 }
 
-val githubUser: String by project
-val githubPassword: String by project
-
 repositories {
     mavenCentral()
-    maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://jitpack.io")
     maven {
-        url = uri("https://maven.pkg.github.com/navikt/maven-release")
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
 }
 
 val testContainersVersion = "1.19.5"
 val logstashLogbackEncoderVersion = "7.4"
 val kluentVersion = "1.73"
-val brukernotifikasjonAvroVersion = "2.5.2"
-val confluentVersion = "7.6.0"
+val varselKotlinBuilderVersion = "1.0.0"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -52,8 +46,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
-    implementation("com.github.navikt:brukernotifikasjon-schemas:$brukernotifikasjonAvroVersion")
-    implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
+    implementation("no.nav.tms.varsel:kotlin-builder:$varselKotlinBuilderVersion")
 
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -76,6 +69,9 @@ kotlin {
 tasks {
     test {
         useJUnitPlatform()
+        environment("NAIS_CLUSTER_NAME", "test-gcp")
+        environment("NAIS_NAMESPACE", "flex")
+        environment("NAIS_APP_NAME", "syfosoknadbrukernotifikasjon")
         jvmArgs("-XX:+EnableDynamicAgentLoading")
         testLogging {
             events("PASSED", "FAILED", "SKIPPED")
