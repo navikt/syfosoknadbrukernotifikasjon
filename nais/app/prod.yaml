@@ -1,8 +1,8 @@
 db_tier: db-custom-1-3840
 cpu: 200m
 memory: 512Mi
-minReplicas: '1'
-maxReplicas: '1'
+minReplicas: 1
+maxReplicas: 1
 kafkaPool: nav-prod
 env:
   SYKEPENGESOKNAD_FRONTEND_URL: https://www.nav.no/syk/sykepengesoknad/soknader/
