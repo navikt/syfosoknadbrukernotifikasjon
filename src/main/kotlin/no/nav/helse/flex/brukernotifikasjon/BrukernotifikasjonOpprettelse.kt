@@ -85,6 +85,7 @@ private fun Brukernotifikasjon.opprettBrukernotifikasjonTekst(): String =
 
         Soknadstype.REISETILSKUDD -> "Du har en søknad om reisetilskudd du må fylle ut"
         Soknadstype.GRADERT_REISETILSKUDD -> "Du har en søknad om sykepenger med reisetilskudd du må fylle ut"
+        Soknadstype.OPPHOLD_UTLAND -> "Du har en søknad om å beholde sykepengene for reise utenfor EU/EØS du må fylle ut"
         else -> throw IllegalArgumentException(
             "Søknad ${this.soknadsid} er av type ${this.soknadstype} og skal ikke ha brukernotifikasjon oppgave",
         )

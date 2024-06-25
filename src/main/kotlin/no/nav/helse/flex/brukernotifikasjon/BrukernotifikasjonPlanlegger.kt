@@ -2,7 +2,6 @@ package no.nav.helse.flex.brukernotifikasjon
 
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
-import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
 import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
@@ -103,13 +102,10 @@ internal fun finnUtsendelsestidspunkt(now: ZonedDateTime = ZonedDateTime.now(osl
 }
 
 private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
-    return this.status == Soknadsstatus.NY && this.type != Soknadstype.OPPHOLD_UTLAND
+    return this.status == Soknadsstatus.NY
 }
 
 private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
-    if (this.type == Soknadstype.OPPHOLD_UTLAND) {
-        return false
-    }
     return when (this.status) {
         Soknadsstatus.SLETTET -> true
         Soknadsstatus.AVBRUTT -> true
