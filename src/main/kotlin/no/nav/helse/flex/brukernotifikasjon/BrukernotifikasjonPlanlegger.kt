@@ -2,6 +2,7 @@ package no.nav.helse.flex.brukernotifikasjon
 
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
+import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
 import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
@@ -32,7 +33,11 @@ class BrukernotifikasjonPlanlegger(
         if (sykepengesoknad.skalOppretteOppgave()) {
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
-                val utsendelsestidspunkt = finnUtsendelsestidspunkt()
+                val utsendelsestidspunkt =
+                    when (sykepengesoknad.type) {
+                        Soknadstype.OPPHOLD_UTLAND -> finnUtsendelsestidspunkt(ZonedDateTime.now(osloZone).plusDays(1))
+                        else -> finnUtsendelsestidspunkt()
+                    }
 
                 brukernotifikasjonRepository.insert(
                     soknadsid = sykepengesoknad.id,

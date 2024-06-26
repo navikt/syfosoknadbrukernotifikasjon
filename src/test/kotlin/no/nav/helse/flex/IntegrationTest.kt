@@ -7,6 +7,7 @@ import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
+import no.nav.helse.flex.util.osloZone
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.builder.VarselActionBuilder
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 class IntegrationTest : FellesTestOppsett() {
@@ -371,7 +373,8 @@ class IntegrationTest : FellesTestOppsett() {
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
                     omFireDager,
                 )
-            tilUtsendelse.size == 1
+            tilUtsendelse.size `should be equal to` 1
+            tilUtsendelse.first().utsendelsestidspunkt?.isAfter(ZonedDateTime.now(osloZone).toInstant()) `should be` true
         }
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
         val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
