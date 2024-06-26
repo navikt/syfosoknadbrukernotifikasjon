@@ -7,6 +7,7 @@ import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
+import no.nav.helse.flex.util.osloZone
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.builder.VarselActionBuilder
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 class IntegrationTest : FellesTestOppsett() {
@@ -343,5 +345,84 @@ class IntegrationTest : FellesTestOppsett() {
 
     fun String.tilInaktiverVarselInstance(): VarselActionBuilder.InaktiverVarselInstance {
         return objectMapper.readValue(this)
+    }
+
+    @Test
+    fun `NY og SENDT OPPHOLD_UTLAND mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
+        val id = UUID.randomUUID().toString()
+        val sykmeldingId = UUID.randomUUID().toString()
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.OPPHOLD_UTLAND,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
+
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                enkelSoknad.serialisertTilString(),
+            ),
+        )
+        await().until {
+            val tilUtsendelse =
+                brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
+                    omFireDager,
+                )
+            tilUtsendelse.size `should be equal to` 1
+            tilUtsendelse.first().utsendelsestidspunkt?.isAfter(ZonedDateTime.now(osloZone).toInstant()) `should be` true
+        }
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
+        val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
+
+        // Send samme søknad
+
+        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                sendtSoknad.serialisertTilString(),
+            ),
+        )
+        // Håndterer duplikat av sendt
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                sendtSoknad.serialisertTilString(),
+            ),
+        )
+
+        val dones = varslingConsumer.ventPåRecords(antall = 1)
+
+        oppgaver.shouldHaveSize(1)
+        dones.shouldHaveSize(1)
+
+        val oppgaveNokkel = oppgaver.first().key()
+        val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
+
+        oppgaveNokkel shouldBeEqualTo id
+
+        oppgave.varselId shouldBeEqualTo id
+        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
+        oppgave.ident shouldBeEqualTo fnr
+        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om å beholde sykepengene for reise utenfor EU/EØS du må fylle ut"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+
+        val doneNokkel = dones.first().key()
+        val done = dones.first().value().tilInaktiverVarselInstance()
+
+        doneNokkel shouldBeEqualTo id
+        done.varselId shouldBeEqualTo id
+        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
+        done.produsent!!.namespace shouldBeEqualTo "flex"
     }
 }

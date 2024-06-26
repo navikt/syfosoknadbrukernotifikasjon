@@ -33,7 +33,11 @@ class BrukernotifikasjonPlanlegger(
         if (sykepengesoknad.skalOppretteOppgave()) {
             val brukernotfikasjon = brukernotifikasjonRepository.findByIdOrNull(sykepengesoknad.id)
             if (brukernotfikasjon == null) {
-                val utsendelsestidspunkt = finnUtsendelsestidspunkt()
+                val utsendelsestidspunkt =
+                    when (sykepengesoknad.type) {
+                        Soknadstype.OPPHOLD_UTLAND -> finnUtsendelsestidspunkt(ZonedDateTime.now(osloZone).plusDays(1))
+                        else -> finnUtsendelsestidspunkt()
+                    }
 
                 brukernotifikasjonRepository.insert(
                     soknadsid = sykepengesoknad.id,
@@ -103,13 +107,10 @@ internal fun finnUtsendelsestidspunkt(now: ZonedDateTime = ZonedDateTime.now(osl
 }
 
 private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
-    return this.status == Soknadsstatus.NY && this.type != Soknadstype.OPPHOLD_UTLAND
+    return this.status == Soknadsstatus.NY
 }
 
 private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
-    if (this.type == Soknadstype.OPPHOLD_UTLAND) {
-        return false
-    }
     return when (this.status) {
         Soknadsstatus.SLETTET -> true
         Soknadsstatus.AVBRUTT -> true
