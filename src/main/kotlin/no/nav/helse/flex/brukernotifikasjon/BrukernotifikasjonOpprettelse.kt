@@ -31,6 +31,12 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
+                val soknadLenke =
+                    if (brukernotifikasjon.soknadstype == Soknadstype.OPPHOLD_UTLAND) {
+                        "${sykepengesoknadFrontend.substringBefore("soknader/")}sykepengesoknad-utland"
+                    } else {
+                        "$sykepengesoknadFrontend${brukernotifikasjon.soknadsid}"
+                    }
                 val opprettVarsel =
                     VarselActionBuilder.opprett {
                         type = Varseltype.Oppgave
@@ -44,7 +50,7 @@ class BrukernotifikasjonOpprettelse(
                                 default = true,
                             )
                         aktivFremTil = null
-                        link = "${sykepengesoknadFrontend}${brukernotifikasjon.soknadsid}"
+                        link = soknadLenke
                         eksternVarsling =
                             if (brukernotifikasjon.eksterntVarsel) {
                                 EksternVarslingBestilling(

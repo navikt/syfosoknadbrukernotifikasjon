@@ -414,7 +414,7 @@ class IntegrationTest : FellesTestOppsett() {
         oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
         oppgave.ident shouldBeEqualTo fnr
         oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om å beholde sykepengene for reise utenfor EU/EØS du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/sykepengesoknad-utland"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value().tilInaktiverVarselInstance()
