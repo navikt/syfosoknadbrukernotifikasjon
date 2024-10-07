@@ -1,5 +1,5 @@
 db_tier: db-custom-1-3840
-cpu: 200m
+cpu: 500m
 memory: 512Mi
 minReplicas: 1
 maxReplicas: 1
