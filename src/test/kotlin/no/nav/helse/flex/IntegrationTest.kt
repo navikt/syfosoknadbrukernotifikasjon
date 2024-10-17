@@ -35,6 +35,7 @@ class IntegrationTest : FellesTestOppsett() {
 
     val fnr = "13068700000"
     val omFireDager = OffsetDateTime.now().plusDays(4).toInstant()
+    val omNiDager = OffsetDateTime.now().plusDays(9).toInstant()
 
     @Test
     fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut med eksternt varsel`() {
@@ -371,12 +372,12 @@ class IntegrationTest : FellesTestOppsett() {
         await().until {
             val tilUtsendelse =
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
-                    omFireDager,
+                    omNiDager,
                 )
             tilUtsendelse.size `should be equal to` 1
             tilUtsendelse.first().utsendelsestidspunkt?.isAfter(ZonedDateTime.now(osloZone).toInstant()) `should be` true
         }
-        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omNiDager)
         val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
