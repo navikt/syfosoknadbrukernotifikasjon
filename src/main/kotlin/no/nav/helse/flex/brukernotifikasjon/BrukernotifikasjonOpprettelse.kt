@@ -31,35 +31,7 @@ class BrukernotifikasjonOpprettelse(
         brukernotifikasjoner.forEach {
             val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(it.soknadsid)!!
             if (brukernotifikasjon.utsendelsestidspunkt != null && brukernotifikasjon.utsendelsestidspunkt.isBefore(now)) {
-                val soknadLenke =
-                    if (brukernotifikasjon.soknadstype == Soknadstype.OPPHOLD_UTLAND) {
-                        "${sykepengesoknadFrontend.substringBefore("soknader/")}sykepengesoknad-utland"
-                    } else {
-                        "$sykepengesoknadFrontend${brukernotifikasjon.soknadsid}"
-                    }
-                val opprettVarsel =
-                    VarselActionBuilder.opprett {
-                        type = Varseltype.Oppgave
-                        varselId = brukernotifikasjon.soknadsid
-                        sensitivitet = Sensitivitet.High
-                        ident = brukernotifikasjon.fnr
-                        tekst =
-                            Tekst(
-                                spraakkode = "nb",
-                                tekst = brukernotifikasjon.opprettBrukernotifikasjonTekst(),
-                                default = true,
-                            )
-                        aktivFremTil = null
-                        link = soknadLenke
-                        eksternVarsling =
-                            if (brukernotifikasjon.eksterntVarsel) {
-                                EksternVarslingBestilling(
-                                    prefererteKanaler = listOf(EksternKanal.SMS),
-                                )
-                            } else {
-                                null
-                            }
-                    }
+                val opprettVarsel = brukernotifikasjon.tilOpprettVarsel(sykepengesoknadFrontend)
 
                 log.info(
                     "Sender dittnav varsel med id ${brukernotifikasjon.soknadsid}",
@@ -96,3 +68,36 @@ private fun Brukernotifikasjon.opprettBrukernotifikasjonTekst(): String =
             "Søknad ${this.soknadsid} er av type ${this.soknadstype} og skal ikke ha brukernotifikasjon oppgave",
         )
     }
+
+fun Brukernotifikasjon.tilOpprettVarsel(sykepengesoknadFrontend: String): String {
+    val brukernotifikasjon = this
+    val soknadLenke =
+        if (brukernotifikasjon.soknadstype == Soknadstype.OPPHOLD_UTLAND) {
+            "${sykepengesoknadFrontend.substringBefore("soknader/")}sykepengesoknad-utland"
+        } else {
+            "$sykepengesoknadFrontend${brukernotifikasjon.soknadsid}"
+        }
+
+    return VarselActionBuilder.opprett {
+        type = Varseltype.Oppgave
+        varselId = brukernotifikasjon.soknadsid
+        sensitivitet = Sensitivitet.High
+        ident = brukernotifikasjon.fnr
+        tekst =
+            Tekst(
+                spraakkode = "nb",
+                tekst = brukernotifikasjon.opprettBrukernotifikasjonTekst(),
+                default = true,
+            )
+        aktivFremTil = null
+        link = soknadLenke
+        eksternVarsling =
+            if (brukernotifikasjon.eksterntVarsel) {
+                EksternVarslingBestilling(
+                    prefererteKanaler = listOf(EksternKanal.SMS),
+                )
+            } else {
+                null
+            }
+    }
+}
