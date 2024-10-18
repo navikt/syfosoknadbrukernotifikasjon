@@ -31,7 +31,6 @@ val testContainersVersion = "1.20.2"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
 val varselKotlinBuilderVersion = "1.1.0"
-val jacksonVersion = "2.17.2"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -47,10 +46,10 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
-    implementation("no.nav.tms.varsel:kotlin-builder:$varselKotlinBuilderVersion")
-    // Bruker samme jackson-versjon som kotlin-builder bruker siden versjonen fra Spring ikke er kompatibel.
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-
+    implementation("no.nav.tms.varsel:kotlin-builder:$varselKotlinBuilderVersion") {
+        exclude(group = "com.fasterxml.jackson.datatype", module = "jackson-datatype-jsr310")
+        exclude(group = "com.fasterxml.jackson.module", module = "jackson-module-kotlin")
+    }
     testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainersVersion"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:postgresql")
