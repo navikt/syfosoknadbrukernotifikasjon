@@ -1,6 +1,6 @@
 db_tier: db-custom-1-3840
 cpu: 500m
-memory: 600Mi
+memory: 1000Mi
 minReplicas: 1
 maxReplicas: 1
 kafkaPool: nav-prod
