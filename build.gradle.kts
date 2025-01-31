@@ -30,7 +30,7 @@ repositories {
 val testContainersVersion = "1.20.4"
 val logstashLogbackEncoderVersion = "8.0"
 val kluentVersion = "1.73"
-val varselKotlinBuilderVersion = "1.1.0"
+val varselKotlinBuilderVersion = "2.1.1"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
