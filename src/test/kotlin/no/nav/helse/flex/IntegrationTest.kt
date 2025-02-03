@@ -426,4 +426,82 @@ class IntegrationTest : FellesTestOppsett() {
         done.produsent!!.cluster shouldBeEqualTo "test-gcp"
         done.produsent!!.namespace shouldBeEqualTo "flex"
     }
+
+    @Test
+    fun `NY og SENDT friskmeldt til arbeidsformidling mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
+        val id = UUID.randomUUID().toString()
+        val sykmeldingId = UUID.randomUUID().toString()
+        val enkelSoknad =
+            EnkelSykepengesoknad(
+                id = id,
+                status = Soknadsstatus.NY,
+                type = Soknadstype.FRISKMELDT_TIL_ARBEIDSFORMIDLING,
+                fnr = fnr,
+                sykmeldingId = sykmeldingId,
+            )
+
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                enkelSoknad.serialisertTilString(),
+            ),
+        )
+        await().until {
+            val tilUtsendelse =
+                brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
+                    omFireDager,
+                )
+            tilUtsendelse.size == 1
+        }
+        brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
+        val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
+
+        // Send samme søknad
+
+        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                sendtSoknad.serialisertTilString(),
+            ),
+        )
+        // Håndterer duplikat av sendt
+        aivenKafkaProducer.send(
+            ProducerRecord(
+                SYKEPENGESOKNAD_TOPIC,
+                null,
+                id,
+                sendtSoknad.serialisertTilString(),
+            ),
+        )
+
+        val dones = varslingConsumer.ventPåRecords(antall = 1)
+
+        oppgaver.shouldHaveSize(1)
+        dones.shouldHaveSize(1)
+
+        val oppgaveNokkel = oppgaver.first().key()
+        val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
+
+        oppgaveNokkel shouldBeEqualTo id
+
+        oppgave.varselId shouldBeEqualTo id
+        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
+        oppgave.ident shouldBeEqualTo fnr
+        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+
+        val doneNokkel = dones.first().key()
+        val done = dones.first().value().tilInaktiverVarselInstance()
+
+        doneNokkel shouldBeEqualTo id
+        done.varselId shouldBeEqualTo id
+        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
+        done.produsent!!.namespace shouldBeEqualTo "flex"
+    }
 }
