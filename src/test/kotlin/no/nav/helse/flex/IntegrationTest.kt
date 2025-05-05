@@ -76,7 +76,8 @@ class IntegrationTest : FellesTestOppsett() {
                 )
             tilUtsendelse.size == 1
         }
-        brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now())
+        brukernotifikasjonRepository
+            .findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(Instant.now())
             .shouldBeEmpty()
 
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omFireDager)
@@ -340,13 +341,9 @@ class IntegrationTest : FellesTestOppsett() {
         }
     }
 
-    fun String.tilOpprettVarselInstance(): VarselActionBuilder.OpprettVarselInstance {
-        return objectMapper.readValue(this)
-    }
+    fun String.tilOpprettVarselInstance(): VarselActionBuilder.OpprettVarselInstance = objectMapper.readValue(this)
 
-    fun String.tilInaktiverVarselInstance(): VarselActionBuilder.InaktiverVarselInstance {
-        return objectMapper.readValue(this)
-    }
+    fun String.tilInaktiverVarselInstance(): VarselActionBuilder.InaktiverVarselInstance = objectMapper.readValue(this)
 
     @Test
     fun `NY og SENDT OPPHOLD_UTLAND mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
