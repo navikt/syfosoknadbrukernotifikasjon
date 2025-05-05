@@ -106,12 +106,10 @@ internal fun finnUtsendelsestidspunkt(now: ZonedDateTime = ZonedDateTime.now(osl
     return utsendelsestidspunkt
 }
 
-private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean {
-    return this.status == Soknadsstatus.NY
-}
+private fun EnkelSykepengesoknad.skalOppretteOppgave(): Boolean = this.status == Soknadsstatus.NY
 
-private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
-    return when (this.status) {
+private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean =
+    when (this.status) {
         Soknadsstatus.SLETTET -> true
         Soknadsstatus.AVBRUTT -> true
         Soknadsstatus.SENDT -> true
@@ -120,4 +118,3 @@ private fun EnkelSykepengesoknad.skalSendeDoneMelding(): Boolean {
         Soknadsstatus.FREMTIDIG -> false
         Soknadsstatus.KORRIGERT -> false
     }
-}
