@@ -16,7 +16,7 @@ import java.time.Instant
 @Service
 class BrukernotifikasjonOpprettelse(
     private val kafkaProducer: KafkaProducer<String, String>,
-    @Value("\${frontend-url}") val sykepengesoknadFrontend: String,
+    @param:Value("\${frontend-url}") val sykepengesoknadFrontend: String,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
 ) {
     val log = logger()
