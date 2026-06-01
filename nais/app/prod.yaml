@@ -4,6 +4,10 @@ memory: 640Mi
 minReplicas: 1
 maxReplicas: 1
 kafkaPool: nav-prod
+db_flags:
+  cloudsql.enable_pgaudit: "true"
+  pgaudit.log: 'write,ddl,role'
+  pgaudit.log_parameter: "on"
 env:
   SYKEPENGESOKNAD_FRONTEND_URL: https://www.nav.no/syk/sykepengesoknad/soknader/
   SPRING_PROFILES_ACTIVE: default
