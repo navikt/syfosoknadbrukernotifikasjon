@@ -50,23 +50,6 @@ class BrukernotifikasjonOpprettelse(
         }
         return antall
     }
-
-    fun resettUtsendelsestidspunkt(
-        soknadsId: String,
-        utsendelsestidspunkt: Instant,
-    ) {
-        val brukernotifikasjon = brukernotifikasjonRepository.findByIdOrNull(soknadsId)!!
-
-        brukernotifikasjonRepository.save(
-            brukernotifikasjon.copy(
-                utsendelsestidspunkt = utsendelsestidspunkt,
-            ),
-        )
-
-        log.info(
-            "Resend: Oppdaterte utsendelsestidspunkt for soknad: ${brukernotifikasjon.soknadsid} til: $utsendelsestidspunkt",
-        )
-    }
 }
 
 private fun Brukernotifikasjon.opprettBrukernotifikasjonTekst(): String =
