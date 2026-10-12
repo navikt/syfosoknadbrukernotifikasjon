@@ -1,6 +1,5 @@
 package no.nav.helse.flex
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
@@ -18,6 +17,7 @@ import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZonedDateTime
