@@ -47,11 +47,13 @@ spec:
         diskAutoresize: true
         databases:
           - name: syfosoknadbrukernotifikasjon-db
+        {{#if db_flags}}
         flags:
         {{#each db_flags}}
           - name: {{@key}}
             value: "{{this}}"
         {{/each}}
+        {{/if}}
   kafka:
     pool: {{kafkaPool}}
   leaderElection: true
