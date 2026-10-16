@@ -60,6 +60,7 @@ private fun Brukernotifikasjon.opprettBrukernotifikasjonTekst(): String =
         Soknadstype.ARBEIDSLEDIG,
         Soknadstype.BEHANDLINGSDAGER,
         Soknadstype.FRISKMELDT_TIL_ARBEIDSFORMIDLING,
+        Soknadstype.FISKERE,
         -> "Du har en søknad om sykepenger du må fylle ut"
 
         Soknadstype.REISETILSKUDD -> "Du har en søknad om reisetilskudd du må fylle ut"
