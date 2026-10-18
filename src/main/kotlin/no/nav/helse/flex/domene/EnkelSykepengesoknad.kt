@@ -1,8 +1,5 @@
 package no.nav.helse.flex.domene
 
-import no.nav.helse.flex.objectMapper
-import tools.jackson.module.kotlin.readValue
-
 data class EnkelSykepengesoknad(
     val id: String,
     val status: Soknadsstatus,
@@ -33,5 +30,3 @@ enum class Soknadstype {
     FRISKMELDT_TIL_ARBEIDSFORMIDLING,
     FISKERE,
 }
-
-fun String.tilEnkelSykepengesoknad(): EnkelSykepengesoknad = objectMapper.readValue(this)
