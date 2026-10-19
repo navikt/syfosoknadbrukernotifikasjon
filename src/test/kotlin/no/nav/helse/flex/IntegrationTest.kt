@@ -2,10 +2,10 @@ package no.nav.helse.flex
 
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonRepository
-import no.nav.helse.flex.domene.EnkelSykepengesoknad
-import no.nav.helse.flex.domene.Soknadsstatus
-import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.util.osloZone
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
@@ -34,18 +34,18 @@ class IntegrationTest : FellesTestOppsett() {
     private lateinit var brukernotifikasjonOpprettelse: BrukernotifikasjonOpprettelse
 
     val fnr = "13068700000"
-    val omFireDager = OffsetDateTime.now().plusDays(4).toInstant()
-    val omNiDager = OffsetDateTime.now().plusDays(9).toInstant()
+    val omFireDager: Instant = OffsetDateTime.now().plusDays(4).toInstant()
+    val omNiDager: Instant = OffsetDateTime.now().plusDays(9).toInstant()
 
     @Test
     fun `NY arbeidstaker søknad mottas fra kafka topic og dittnav oppgave sendes ut med eksternt varsel`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -55,7 +55,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
 
@@ -65,7 +65,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
 
@@ -114,11 +114,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `SENDT søknad uten innslag i db får ikke done oppgave`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.SENDT,
-                type = Soknadstype.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.SENDT,
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -128,7 +128,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
 
@@ -139,11 +139,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `NY og SENDT søknad mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -153,7 +153,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
         await().until {
@@ -169,7 +169,7 @@ class IntegrationTest : FellesTestOppsett() {
         val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
 
         // Send samme søknad
-        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        val sendtSoknad = soknad.copy(status = SoknadsstatusDTO.SENDT)
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
@@ -218,11 +218,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `NY og SENDT reisetilskudd mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.REISETILSKUDD,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.REISETILSKUDD,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -232,7 +232,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
         await().until {
@@ -247,7 +247,7 @@ class IntegrationTest : FellesTestOppsett() {
 
         // Send samme søknad
 
-        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        val sendtSoknad = soknad.copy(status = SoknadsstatusDTO.SENDT)
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
@@ -296,11 +296,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `Ustendendelse avbrytes hvis SENDT melding kommer før vi sender brukernotifikasjonen`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.ARBEIDSTAKERE,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.ARBEIDSTAKERE,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -310,7 +310,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
         await().until {
@@ -322,7 +322,7 @@ class IntegrationTest : FellesTestOppsett() {
         }
         varslingConsumer.ventPåRecords(antall = 0)
 
-        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        val sendtSoknad = soknad.copy(status = SoknadsstatusDTO.SENDT)
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
@@ -349,11 +349,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `NY og SENDT OPPHOLD_UTLAND mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.OPPHOLD_UTLAND,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.OPPHOLD_UTLAND,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -363,7 +363,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
         await().until {
@@ -379,7 +379,7 @@ class IntegrationTest : FellesTestOppsett() {
 
         // Send samme søknad
 
-        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        val sendtSoknad = soknad.copy(status = SoknadsstatusDTO.SENDT)
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,
@@ -428,11 +428,11 @@ class IntegrationTest : FellesTestOppsett() {
     fun `NY og SENDT friskmeldt til arbeidsformidling mottas fra kafka topic og dittnav oppgave og done melding sendes ut`() {
         val id = UUID.randomUUID().toString()
         val sykmeldingId = UUID.randomUUID().toString()
-        val enkelSoknad =
-            EnkelSykepengesoknad(
+        val soknad =
+            SykepengesoknadDTO(
                 id = id,
-                status = Soknadsstatus.NY,
-                type = Soknadstype.FRISKMELDT_TIL_ARBEIDSFORMIDLING,
+                status = SoknadsstatusDTO.NY,
+                type = SoknadstypeDTO.FRISKMELDT_TIL_ARBEIDSFORMIDLING,
                 fnr = fnr,
                 sykmeldingId = sykmeldingId,
             )
@@ -442,7 +442,7 @@ class IntegrationTest : FellesTestOppsett() {
                 SYKEPENGESOKNAD_TOPIC,
                 null,
                 id,
-                enkelSoknad.serialisertTilString(),
+                soknad.serialisertTilString(),
             ),
         )
         await().until {
@@ -457,7 +457,7 @@ class IntegrationTest : FellesTestOppsett() {
 
         // Send samme søknad
 
-        val sendtSoknad = enkelSoknad.copy(status = Soknadsstatus.SENDT)
+        val sendtSoknad = soknad.copy(status = SoknadsstatusDTO.SENDT)
         aivenKafkaProducer.send(
             ProducerRecord(
                 SYKEPENGESOKNAD_TOPIC,

@@ -3,7 +3,6 @@ package no.nav.helse.flex.brukernotifikasjon
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
-import no.nav.helse.flex.domene.tilEnkelSykepengesoknad
 import no.nav.helse.flex.kafka.nyttVarselTopic
 import no.nav.helse.flex.logger
 import no.nav.helse.flex.util.minuttMellom0og59
@@ -23,9 +22,7 @@ class BrukernotifikasjonPlanlegger(
 ) {
     val log = logger()
 
-    fun planleggBrukernotfikasjon(sykepengesoknadSomString: String) {
-        val sykepengesoknad = sykepengesoknadSomString.tilEnkelSykepengesoknad()
-
+    fun planleggBrukernotfikasjon(sykepengesoknad: EnkelSykepengesoknad) {
         val fnr = sykepengesoknad.fnr
 
         val grupperingsid = sykepengesoknad.sykmeldingId ?: sykepengesoknad.id
