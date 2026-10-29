@@ -2,8 +2,8 @@ db_type: POSTGRES_14
 db_tier: db-f1-micro
 cpu: 50m
 memory: 640Mi
-minReplicas: 1
-maxReplicas: 1
+minReplicas: 0
+maxReplicas: 0
 kafkaPool: nav-dev
 env:
   SYKEPENGESOKNAD_FRONTEND_URL: https://www.ekstern.dev.nav.no/syk/sykepengesoknad/soknader/
