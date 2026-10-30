@@ -1,9 +1,9 @@
-db_type: POSTGRES_14
+db_type: POSTGRES_18
 db_tier: db-custom-1-3840
 cpu: 100m
 memory: 640Mi
-minReplicas: 1
-maxReplicas: 1
+minReplicas: 0
+maxReplicas: 0
 kafkaPool: nav-prod
 db_flags:
   cloudsql.enable_pgaudit: "on"
