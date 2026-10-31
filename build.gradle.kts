@@ -31,7 +31,7 @@ val testContainersVersion = "2.0.5"
 val logstashLogbackEncoderVersion = "9.0"
 val kluentVersion = "1.73"
 val varselKotlinBuilderVersion = "1.1.0"
-val sykepengesoknadKafkaVersion = "2026.10.12-15.08-be710154"
+val sykepengesoknadKafkaVersion = "2026.10.29-06.32-9ce6afeb"
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
