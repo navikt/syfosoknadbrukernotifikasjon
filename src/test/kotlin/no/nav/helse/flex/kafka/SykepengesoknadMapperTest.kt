@@ -1,12 +1,12 @@
 package no.nav.helse.flex.kafka
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.EnkelSykepengesoknad
 import no.nav.helse.flex.domene.Soknadsstatus
 import no.nav.helse.flex.domene.Soknadstype
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 
 class SykepengesoknadMapperTest {
@@ -21,7 +21,7 @@ class SykepengesoknadMapperTest {
                 sykmeldingId = "sykmeldingsid",
             )
 
-        soknad.tilEnkelSykepengesoknad() shouldBeEqualTo
+        soknad.tilEnkelSykepengesoknad() shouldBe
             EnkelSykepengesoknad(
                 id = "soknadsid",
                 status = Soknadsstatus.NY,

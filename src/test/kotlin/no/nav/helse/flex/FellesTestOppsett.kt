@@ -1,7 +1,7 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import no.nav.helse.flex.kafka.nyttVarselTopic
-import org.amshove.kluent.shouldBeEmpty
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

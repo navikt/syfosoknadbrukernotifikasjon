@@ -1,5 +1,10 @@
 package no.nav.helse.flex
 
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonOpprettelse
 import no.nav.helse.flex.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.helse.flex.kafka.SYKEPENGESOKNAD_TOPIC
@@ -10,7 +15,6 @@ import no.nav.helse.flex.util.osloZone
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.builder.VarselActionBuilder
-import org.amshove.kluent.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -88,24 +92,24 @@ class IntegrationTest : FellesTestOppsett() {
         oppgaver.shouldHaveSize(1)
 
         val nokkel = oppgaver[0].key()
-        nokkel shouldBeEqualTo id
+        nokkel shouldBe id
 
         val oppgave = oppgaver[0].value().tilOpprettVarselInstance()
-        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
-        oppgave.ident shouldBeEqualTo fnr
-        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.sensitivitet shouldBe Sensitivitet.High
+        oppgave.ident shouldBe fnr
+        oppgave.tekster.first().tekst shouldBe "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBe "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
         oppgave.eksternVarsling.shouldNotBeNull()
-        oppgave.eksternVarsling!!.prefererteKanaler shouldBeEqualTo listOf(EksternKanal.SMS)
+        oppgave.eksternVarsling!!.prefererteKanaler shouldBe listOf(EksternKanal.SMS)
         oppgave.eksternVarsling!!.smsVarslingstekst.shouldBeNull()
-        oppgave.produsent!!.namespace shouldBeEqualTo "flex"
-        oppgave.produsent!!.cluster shouldBeEqualTo "test-gcp"
-        oppgave.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
+        oppgave.produsent!!.namespace shouldBe "flex"
+        oppgave.produsent!!.cluster shouldBe "test-gcp"
+        oppgave.produsent!!.appnavn shouldBe "syfosoknadbrukernotifikasjon"
 
         val brukernotifikasjonDb = brukernotifikasjonRepository.findByIdOrNull(id)!!
-        brukernotifikasjonDb.grupperingsid shouldBeEqualTo sykmeldingId
-        brukernotifikasjonDb.soknadsid shouldBeEqualTo id
-        brukernotifikasjonDb.fnr shouldBeEqualTo fnr
+        brukernotifikasjonDb.grupperingsid shouldBe sykmeldingId
+        brukernotifikasjonDb.soknadsid shouldBe id
+        brukernotifikasjonDb.fnr shouldBe fnr
         brukernotifikasjonDb.oppgaveSendt.shouldNotBeNull()
         brukernotifikasjonDb.doneSendt.shouldBeNull()
     }
@@ -194,24 +198,24 @@ class IntegrationTest : FellesTestOppsett() {
         dones.shouldHaveSize(1)
 
         val oppgaveNokkel = oppgaver.first().key()
-        oppgaveNokkel shouldBeEqualTo id
+        oppgaveNokkel shouldBe id
 
         val oppgaveString = oppgaver.first().value()
         val oppgave = oppgaveString.tilOpprettVarselInstance()
 
-        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
-        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
-        oppgave.ident shouldBeEqualTo fnr
+        oppgave.sensitivitet shouldBe Sensitivitet.High
+        oppgave.tekster.first().tekst shouldBe "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBe "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.ident shouldBe fnr
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel shouldBeEqualTo id
-        done.varselId shouldBeEqualTo id
-        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
-        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
-        done.produsent!!.namespace shouldBeEqualTo "flex"
+        doneNokkel shouldBe id
+        done.varselId shouldBe id
+        done.produsent!!.appnavn shouldBe "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBe "test-gcp"
+        done.produsent!!.namespace shouldBe "flex"
     }
 
     @Test
@@ -274,22 +278,22 @@ class IntegrationTest : FellesTestOppsett() {
         val oppgaveNokkel = oppgaver.first().key()
         val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
 
-        oppgaveNokkel shouldBeEqualTo id
+        oppgaveNokkel shouldBe id
 
-        oppgave.varselId shouldBeEqualTo id
-        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
-        oppgave.ident shouldBeEqualTo fnr
-        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om reisetilskudd du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.varselId shouldBe id
+        oppgave.sensitivitet shouldBe Sensitivitet.High
+        oppgave.ident shouldBe fnr
+        oppgave.tekster.first().tekst shouldBe "Du har en søknad om reisetilskudd du må fylle ut"
+        oppgave.link shouldBe "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel shouldBeEqualTo id
-        done.varselId shouldBeEqualTo id
-        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
-        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
-        done.produsent!!.namespace shouldBeEqualTo "flex"
+        doneNokkel shouldBe id
+        done.varselId shouldBe id
+        done.produsent!!.appnavn shouldBe "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBe "test-gcp"
+        done.produsent!!.namespace shouldBe "flex"
     }
 
     @Test
@@ -371,8 +375,8 @@ class IntegrationTest : FellesTestOppsett() {
                 brukernotifikasjonRepository.findByUtsendelsestidspunktIsNotNullAndUtsendelsestidspunktIsBefore(
                     omNiDager,
                 )
-            tilUtsendelse.size `should be equal to` 1
-            tilUtsendelse.first().utsendelsestidspunkt?.isAfter(ZonedDateTime.now(osloZone).toInstant()) `should be` true
+            tilUtsendelse.size shouldBe 1
+            tilUtsendelse.first().utsendelsestidspunkt?.isAfter(ZonedDateTime.now(osloZone).toInstant()) shouldBe true
         }
         brukernotifikasjonOpprettelse.opprettBrukernotifikasjoner(omNiDager)
         val oppgaver = varslingConsumer.ventPåRecords(antall = 1)
@@ -406,22 +410,22 @@ class IntegrationTest : FellesTestOppsett() {
         val oppgaveNokkel = oppgaver.first().key()
         val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
 
-        oppgaveNokkel shouldBeEqualTo id
+        oppgaveNokkel shouldBe id
 
-        oppgave.varselId shouldBeEqualTo id
-        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
-        oppgave.ident shouldBeEqualTo fnr
-        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om å beholde sykepengene for reise utenfor EU/EØS du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/sykepengesoknad-utland"
+        oppgave.varselId shouldBe id
+        oppgave.sensitivitet shouldBe Sensitivitet.High
+        oppgave.ident shouldBe fnr
+        oppgave.tekster.first().tekst shouldBe "Du har en søknad om å beholde sykepengene for reise utenfor EU/EØS du må fylle ut"
+        oppgave.link shouldBe "https://tjenester-q1.nav.no/sykepengesoknad/sykepengesoknad-utland"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel shouldBeEqualTo id
-        done.varselId shouldBeEqualTo id
-        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
-        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
-        done.produsent!!.namespace shouldBeEqualTo "flex"
+        doneNokkel shouldBe id
+        done.varselId shouldBe id
+        done.produsent!!.appnavn shouldBe "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBe "test-gcp"
+        done.produsent!!.namespace shouldBe "flex"
     }
 
     @Test
@@ -484,21 +488,21 @@ class IntegrationTest : FellesTestOppsett() {
         val oppgaveNokkel = oppgaver.first().key()
         val oppgave = oppgaver.first().value().tilOpprettVarselInstance()
 
-        oppgaveNokkel shouldBeEqualTo id
+        oppgaveNokkel shouldBe id
 
-        oppgave.varselId shouldBeEqualTo id
-        oppgave.sensitivitet shouldBeEqualTo Sensitivitet.High
-        oppgave.ident shouldBeEqualTo fnr
-        oppgave.tekster.first().tekst shouldBeEqualTo "Du har en søknad om sykepenger du må fylle ut"
-        oppgave.link shouldBeEqualTo "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
+        oppgave.varselId shouldBe id
+        oppgave.sensitivitet shouldBe Sensitivitet.High
+        oppgave.ident shouldBe fnr
+        oppgave.tekster.first().tekst shouldBe "Du har en søknad om sykepenger du må fylle ut"
+        oppgave.link shouldBe "https://tjenester-q1.nav.no/sykepengesoknad/soknader/$id"
 
         val doneNokkel = dones.first().key()
         val done = dones.first().value().tilInaktiverVarselInstance()
 
-        doneNokkel shouldBeEqualTo id
-        done.varselId shouldBeEqualTo id
-        done.produsent!!.appnavn shouldBeEqualTo "syfosoknadbrukernotifikasjon"
-        done.produsent!!.cluster shouldBeEqualTo "test-gcp"
-        done.produsent!!.namespace shouldBeEqualTo "flex"
+        doneNokkel shouldBe id
+        done.varselId shouldBe id
+        done.produsent!!.appnavn shouldBe "syfosoknadbrukernotifikasjon"
+        done.produsent!!.cluster shouldBe "test-gcp"
+        done.produsent!!.namespace shouldBe "flex"
     }
 }
