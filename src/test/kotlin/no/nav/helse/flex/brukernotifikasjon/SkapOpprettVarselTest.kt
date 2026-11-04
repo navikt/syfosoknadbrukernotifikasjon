@@ -1,8 +1,8 @@
 package no.nav.helse.flex.brukernotifikasjon
 
+import io.kotest.matchers.shouldBe
 import no.nav.helse.flex.domene.Brukernotifikasjon
 import no.nav.helse.flex.domene.Soknadstype
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.*
@@ -34,6 +34,6 @@ class SkapOpprettVarselTest {
         val normalizedActual = timestampRegex.replace(actualJson) { """"built_at":"FIXED_TIMESTAMP"""" }
 
         // Sammenlign de normaliserte strengene
-        normalizedActual shouldBeEqualTo expectedJson
+        normalizedActual shouldBe expectedJson
     }
 }
